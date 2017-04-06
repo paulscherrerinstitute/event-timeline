@@ -1,0 +1,180 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../psi-external-deps/dependency-underscore.html">
+
+<link rel="import" href="timeline-styles.html">
+<script type="text/javascript" src="timeline.js"></script>
+<!--
+`event-timeline`
+
+
+@demo demo/index.html
+-->
+
+<dom-module id="event-timeline">
+  <template>
+    <style include="timeline-styles">
+      
+      :host {
+        display: block;
+      }
+      .timeline-event-dot.type1 {
+          background: url('img/error.svg') no-repeat;
+      }
+      
+      .timeline-event-dot.type2 {
+          background: url('img/warning.svg') no-repeat !important;
+      }
+      
+      .timeline-event-dot.type3 {
+          background: url('img/normal.svg') no-repeat;
+      }
+      
+      .timeline-event-dot.type4 {
+          background: url('img/maintenance.svg') no-repeat !important;
+      }
+
+    </style>
+    
+    <div id="timeline"></div>
+
+  </template>
+
+  <script>
+    class MyElement extends Polymer.Element {
+      
+      static get is() { return "event-timeline"; }
+      
+      static get properties() {
+        
+        return {
+          
+          /**
+           * [data description]
+           * @type {Object}
+           */
+          data: {
+            type: Array,
+            value: function() { return []; }
+          },
+
+          _dataInternal: {
+
+          },
+
+          /**
+           * Date the visible timeline start.
+           */
+          start: {
+            type: String
+          },
+
+          /**
+           * Date the visible timeline ends (exclusive).
+           */
+          end: {
+            type: String
+          },
+
+          /**
+           * This makes sure that clustering takes place.
+           * @type {Object}
+           */
+          cluster: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false
+          }
+
+        };
+      }
+
+      static get observers() {
+        return [
+          'dataChanged(data.*)'
+        ]
+      }
+
+      /**
+       * Called when the element is upgraded (that is, when an element is created, 
+       * or when a previously-created element becomes defined).
+       * @return {[type]} [description]
+       */
+      constructor() {
+        super();
+      }
+
+      /**
+       * One time initialization.
+       */
+      ready() {
+        super.ready();
+        
+        // specify options
+        var options = {
+          width:           "100%",
+          height:          "125px",
+          cluster:         this.cluster,
+          clusterMaxItems: 1,
+        };
+        // Instantiate our timeline object.
+        this._timeline = new links.Timeline(this.$.timeline, options);
+        if (!_.isEmpty(this.start) && !_.isEmpty(this.end)) {
+          this._timeline.firstDraw = false; // overwrites the logic when draw() is first invoked
+          this._timeline.setVisibleChartRange(new Date(this.start), new Date(this.end), true);
+        }
+        this._installCallbacks();
+      }
+
+      /**
+       * Sets the callback methods needed for hover/click events.
+       */
+      _installCallbacks() {
+        this._timeline.mouseoverItemEventCallback = this._mouseoverItemEventCallback;
+        this._timeline.clickItemEventCallback = this._clickItemEventCallback;
+      }
+
+      /**
+       * Re-draws the timeline.
+       */
+      _draw() {
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          // Draw our timeline with the created data and options
+          this._timeline.draw(_.map(this.data, function(d) { 
+            // add a reference to each item to the timeline instance (for callback methods)
+            d.timelineRef = this._timeline;
+            return d;
+          }.bind(this)));
+        });
+      }
+
+      /**
+       * Callback invoked when over an event icon.
+       */
+      _mouseoverItemEventCallback(eventId) {
+        console.log("hovered");
+      }
+
+      /**
+       * Callback invoked when an event icon is clicked.
+       */
+      _clickItemEventCallback(eventId) {
+        console.log("clicked");
+      }
+
+      /**
+       * Invoked when the data array changes.
+       */
+      dataChanged(data) {
+        // console.log("Data changed" + JSON.stringify(data.value));
+        if (data.value && data.value.length > 0) {
+          this._draw();
+        }
+      }
+
+    }
+
+    window.customElements.define(MyElement.is, MyElement);
+
+  </script>
+</dom-module>

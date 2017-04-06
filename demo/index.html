@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>event-timeline demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../event-timeline.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+      event-timeline .timeline-event-dot.type1 {
+        --background-image: url('../img/warning.svg') no-repeat !important;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="vertical-section-container centered">
+      <h3>Define your own type-assignment (here: different icons for the types)</h3>
+      <demo-snippet>
+        <template>
+          <!-- <style>
+              event-timeline {
+                --background-image: url('../img/warning.svg') no-repeat !important;
+              }
+          </style> -->
+          <event-timeline class="withDummyData" cluster></event-timeline>
+        </template>
+      </demo-snippet>
+    </div>
+<!-- 
+    <div class="vertical-section-container centered">
+      <h3>Event timeline with clustering enabled (contains all elements)</h3>
+      <demo-snippet>
+        <template>
+          <event-timeline class="withDummyData" cluster></event-timeline>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <div class="vertical-section-container centered">
+      <h3>No clustering (zoom in and out)</h3>
+      <demo-snippet>
+        <template>
+          <event-timeline class="withDummyData"></event-timeline>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <div class="vertical-section-container centered">
+      <h3>Setting specific start/end date</h3>
+      <demo-snippet>
+        <template>
+          <event-timeline class="withDummyData" start="2010-08-22" end="2010-08-27" cluster></event-timeline>
+        </template>
+      </demo-snippet>
+    </div>
+    -->
+
+    <script>
+
+      var timelines = document.getElementsByClassName("withDummyData");
+      for (var i = 0; i < timelines.length; i++) {
+        timelines[i].data = _generateDummyData();
+      }
+
+
+      function _generateDummyData() {
+        return [
+            {
+                'start': new Date(2010,7,23),
+                'content': '',
+                'className': 'type2',
+                'event_id': 1
+            },
+            {
+                'start': new Date(2010,7,24),
+                'content': '',
+                'className': 'type3',
+                'event_id': 2
+            },
+            {
+                'start': new Date(2010,7,25),
+                'content': '',
+                'className': 'type1',
+                'event_id': 3
+            },
+            {
+                'start': new Date(2010,7,26),
+                'content': '',
+                'className': 'type1',
+                'event_id': 4
+            },
+            {
+                'start': new Date(2010,7,29),
+                'content': '',
+                'className': 'type3',
+                'event_id': 5
+            },
+            {
+                'start': new Date(2010,7,30),
+                'content': '',
+                'className': 'type2',
+                'event_id': 6
+            },
+            {
+                'start': new Date(2010,8,4),
+                'content': '',
+                'className': 'type3',
+                'event_id': 7
+            },
+            {
+                'start': new Date(2010,8,5),
+                'content': '',
+                'className': 'type3',
+                'event_id': 8
+            },
+            {
+                'start': new Date(2010,8,6),
+                'content': '',
+                'className': 'type4',
+                'event_id': 9
+            },
+            {
+                'start': new Date(2010,8,9),
+                'content': '',
+                'className': 'type3',
+                'event_id': 10
+            }
+        ];
+      };
+    </script>
+  </body>
+</html>
