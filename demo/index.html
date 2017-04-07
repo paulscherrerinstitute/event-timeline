@@ -12,23 +12,23 @@
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../event-timeline.html">
 
-    <style is="custom-style" include="demo-pages-shared-styles">
-      event-timeline .timeline-event-dot.type1 {
-        --background-image: url('../img/warning.svg') no-repeat !important;
-      }
-    </style>
+    <style is="custom-style" include="demo-pages-shared-styles"></style>
   </head>
   <body>
 
     <div class="vertical-section-container centered">
-      <h3>Define your own type-assignment (here: different icons for the types)</h3>
+      <h3>Define your own CSS stylesheet</h3>
       <demo-snippet>
         <template>
-          <!-- <style>
-              event-timeline {
-                --background-image: url('../img/warning.svg') no-repeat !important;
-              }
-          </style> -->
+          <event-timeline class="withDummyData" css-url="http://localhost:8080/components/event-timeline/test.css" cluster></event-timeline>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <div class="vertical-section-container centered">
+      <h3>Define your own CSS stylesheet</h3>
+      <demo-snippet>
+        <template>
           <event-timeline class="withDummyData" cluster></event-timeline>
         </template>
       </demo-snippet>
@@ -66,7 +66,7 @@
 
       var timelines = document.getElementsByClassName("withDummyData");
       for (var i = 0; i < timelines.length; i++) {
-        timelines[i].data = _generateDummyData();
+        timelines[i].addAll(_generateDummyData());
       }
 
 
@@ -74,7 +74,7 @@
         return [
             {
                 'start': new Date(2010,7,23),
-                'content': '',
+                // 'content': '',
                 'className': 'type2',
                 'event_id': 1
             },

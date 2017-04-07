@@ -53,13 +53,16 @@
            * [data description]
            * @type {Object}
            */
-          data: {
+          _data: {
             type: Array,
             value: function() { return []; }
           },
 
-          _dataInternal: {
-
+          /**
+           * URL for the custom CSS to be loaded.
+           */
+          cssUrl: {
+            type: String
           },
 
           /**
@@ -91,7 +94,7 @@
 
       static get observers() {
         return [
-          'dataChanged(data.*)'
+          "_dataChanged(_data.*)"
         ]
       }
 
@@ -110,6 +113,10 @@
       ready() {
         super.ready();
         
+        if (!_.isEmpty(this.cssUrl)) {
+          this._appendExternalStylesheet(this.cssUrl);
+        }
+
         // specify options
         var options = {
           width:           "100%",
@@ -127,6 +134,17 @@
       }
 
       /**
+       * Lodas the external stylesheet configured by the user.
+       */
+      _appendExternalStylesheet(url) {
+        var fileref=document.createElement("link");
+        fileref.setAttribute("rel", "stylesheet");
+        fileref.setAttribute("type", "text/css");
+        fileref.setAttribute("href", url);
+        this.shadowRoot.appendChild(fileref);
+      }
+
+      /**
        * Sets the callback methods needed for hover/click events.
        */
       _installCallbacks() {
@@ -135,17 +153,84 @@
       }
 
       /**
+       * Adds all the event objects in the array.
+       */
+      addAll(eventObjectsArray) {
+        _.each(eventObjectsArray, function(eo) {
+          this.addEvent(eo);
+        }.bind(this))
+      }
+
+      /**
+       * Adds an event to the list timeline if it passes the validation.
+       */
+      addEvent(eventObject) {
+        if (eventObject) {
+          var validation = this._validateRequiredProperties(eventObject);
+          if(validation.isValid) {
+            this.push("_data", this._extendEventObjectIfNecessary(eventObject));
+          }
+        }
+      }
+
+      /**
+       * Makes sure that all necessary properties are set. Otherwise, init them with default values.
+       */
+      _extendEventObjectIfNecessary(eventObject) {
+        if (eventObject) {
+          if (!_.has(eventObject, "content")) {
+            eventObject.content = "";
+          }
+        }
+
+        return eventObject;
+      }
+
+      /**
+       * Validates each timeline object.
+       */
+      _validateRequiredProperties(eventObject) {
+        var validationObj = { isValid: true, msg: ""};
+
+        if (!eventObject) {
+          validationObj.isValid = false;
+          validationObj.msg = "Event object is undefined.";
+          return validationObj;
+        } else if (!_.has(eventObject, "start")) {
+          validationObj.isValid = false;
+          validationObj.msg = "Field 'start' is missing.";
+        }
+
+        return validationObj;
+
+      }
+
+      /**
        * Re-draws the timeline.
        */
       _draw() {
         Polymer.RenderStatus.afterNextRender(this, function() {
           // Draw our timeline with the created data and options
-          this._timeline.draw(_.map(this.data, function(d) { 
+          this._timeline.draw(_.map(this._data, function(d) { 
             // add a reference to each item to the timeline instance (for callback methods)
             d.timelineRef = this._timeline;
             return d;
           }.bind(this)));
         });
+      }
+
+      /**
+       * Draws the timeline with the new data, including a 500ms delay.
+       */
+      _dataChanged(data) {
+        this._debouncer = Polymer.Debouncer.debounce(
+          this._debouncer, // initially undefined
+          Polymer.Async.timeOut.after(500),
+          function() { // callback
+            this._draw()
+          }.bind(this)
+        );
+        
       }
 
       /**
@@ -160,16 +245,6 @@
        */
       _clickItemEventCallback(eventId) {
         console.log("clicked");
-      }
-
-      /**
-       * Invoked when the data array changes.
-       */
-      dataChanged(data) {
-        // console.log("Data changed" + JSON.stringify(data.value));
-        if (data.value && data.value.length > 0) {
-          this._draw();
-        }
       }
 
     }
