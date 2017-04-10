@@ -1,7 +1,14 @@
 <link rel="import" href="../polymer/polymer.html">
 
+<!-- <link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html"> -->
+<link rel="import" href="../iron-icons/iron-icons.html">
+
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+
 <link rel="import" href="../psi-external-deps/dependency-underscore.html">
 
+<link rel="import" href="event-timeline-icons.html">
 <link rel="import" href="timeline-styles.html">
 <script type="text/javascript" src="timeline.js"></script>
 <!--
@@ -36,12 +43,27 @@
 
     </style>
     
+    <!-- <iron-a11y-keys target="[[fetchOnEnterInput]]" keys="enter" on-keys-pressed="_filter"></iron-a11y-keys> -->
+
+    <paper-input id="filterInput" 
+      placeholder="Filter stations"
+      auto-validate
+      autofocus
+      value="{{_filterString::input}}">
+        <paper-icon-button suffix icon="event-timeline-icons:search" on-tap="_filter"></paper-icon-button>
+    </paper-input>
+
+
     <div id="timeline"></div>
+
+    <div id="messages">
+      
+    </div>
 
   </template>
 
   <script>
-    class MyElement extends Polymer.Element {
+    class EventTimeline extends Polymer.Element {
       
       static get is() { return "event-timeline"; }
       
@@ -56,6 +78,10 @@
           _data: {
             type: Array,
             value: function() { return []; }
+          },
+
+          _filterString: {
+            type: String
           },
 
           /**
@@ -87,7 +113,7 @@
             type: Boolean,
             reflectToAttribute: true,
             value: false
-          }
+          },
 
         };
       }
@@ -133,6 +159,10 @@
         this._installCallbacks();
       }
 
+      _filter() {
+        console.log(this.$.channelInput.value);
+      }
+
       /**
        * Lodas the external stylesheet configured by the user.
        */
@@ -149,7 +179,7 @@
        */
       _installCallbacks() {
         this._timeline.mouseoverItemEventCallback = this._mouseoverItemEventCallback;
-        this._timeline.clickItemEventCallback = this._clickItemEventCallback;
+        this._timeline.clickItemEventCallback     = this._clickItemEventCallback;
       }
 
       /**
@@ -249,7 +279,7 @@
 
     }
 
-    window.customElements.define(MyElement.is, MyElement);
+    window.customElements.define(EventTimeline.is, EventTimeline);
 
   </script>
 </dom-module>
