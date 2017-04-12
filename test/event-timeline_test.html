@@ -20,10 +20,25 @@
 
     <script>
       suite('event-timeline', function() {
-        test('instantiating the element works', function() {
+        
+        test('_matchesStation', function() {
           var element = fixture('basic');
-          assert.equal(element.is, 'event-timeline');
+          assert.isTrue(element._matchesStation(undefined, { }));
+          assert.isTrue(element._matchesStation("", { }));
+          assert.isTrue(element._matchesStation("", { station: ""}));
+          assert.isTrue(element._matchesStation("", { station: "test"}));
+          assert.isTrue(element._matchesStation("test", { station: "test"}));
+          
+          assert.isTrue(element._matchesStation("t*", { station: "test"}));
+          assert.isTrue(element._matchesStation("t.*", { station: "test"}));
+          assert.isTrue(element._matchesStation("t.*t", { station: "test"}));
+          assert.isTrue(element._matchesStation("t*st", { station: "test"}));
+          
+          assert.isFalse(element._matchesStation("test", { station: "bollocks"}));
+          assert.isFalse(element._matchesStation("t.t", { station: "test"}));
+
         });
+
       });
     </script>
   </body>

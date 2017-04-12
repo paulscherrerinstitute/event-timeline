@@ -1,16 +1,23 @@
 <link rel="import" href="../polymer/polymer.html">
 
-<!-- <link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html"> -->
+<link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-list/iron-list.html">
 
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="../psi-external-deps/dependency-underscore.html">
+<link rel="import" href="../psi-external-deps/dependency-vis.html">
 
+<!-- <script type="text/javascript" src="timeline.js"></script> -->
+<script type="text/javascript" src="timeline.min.js"></script>
+
+<link rel="import" href="event-timeline-styles.html">
+<link rel="import" href="event-timeline-item.html">
 <link rel="import" href="event-timeline-icons.html">
-<link rel="import" href="timeline-styles.html">
-<script type="text/javascript" src="timeline.js"></script>
+
+<style is="custom-style" include="even-timeline-styles"></style>
 <!--
 `event-timeline`
 
@@ -20,125 +27,129 @@
 
 <dom-module id="event-timeline">
   <template>
-    <style include="timeline-styles">
+    <style>
       
       :host {
         display: block;
       }
-      .timeline-event-dot.type1 {
-          background: url('img/error.svg') no-repeat;
-      }
-      
-      .timeline-event-dot.type2 {
-          background: url('img/warning.svg') no-repeat !important;
-      }
-      
-      .timeline-event-dot.type3 {
-          background: url('img/normal.svg') no-repeat;
-      }
-      
-      .timeline-event-dot.type4 {
-          background: url('img/maintenance.svg') no-repeat !important;
-      }
 
     </style>
     
-    <!-- <iron-a11y-keys target="[[fetchOnEnterInput]]" keys="enter" on-keys-pressed="_filter"></iron-a11y-keys> -->
+    <iron-a11y-keys target="[[fetchOnEnterInput]]" keys="enter" on-keys-pressed="_filter"></iron-a11y-keys>
 
     <paper-input id="filterInput" 
       placeholder="Filter stations"
-      auto-validate
       autofocus
-      value="{{_filterString::input}}">
+      on-input="_filterDelayed">
         <paper-icon-button suffix icon="event-timeline-icons:search" on-tap="_filter"></paper-icon-button>
     </paper-input>
 
 
     <div id="timeline"></div>
 
-    <div id="messages">
-      
+    <div class="timelineEvents">
+      <iron-list id="eventsList" class="eventsList"
+         items="[[_rawEvents]]"
+         hidden$="[[!_rawEvents.length]]" >
+         <template>
+           <event-timeline-item event="[[item]]"></event-timeline-item>
+         </template>
+        </iron-list>
     </div>
 
   </template>
 
   <script>
-    class EventTimeline extends Polymer.Element {
+      (function() {
+    
+    Polymer({
       
-      static get is() { return "event-timeline"; }
+      is: "event-timeline", 
+
+      properties: {
+
+        /**
+         * [data description]
+         * @type {Object}
+         */
+        _rawEvents: {
+          type: Array,
+          value: function() { return []; }
+        },
+
+        /**
+         * The vis dataset holding all data.
+         */
+        _events: {
+          type: vis.DataSet
+        },
+
+        /**
+         * Options to use when instantiating the DataSet instances.
+         */
+        _dsOptions: { 
+          type: Object,
+          value: function() { 
+            return { // specifies the name of the field which acts as ID in the dataset
+              fieldId: "event_id",
+            };
+          }
+        },
+
+        _filterString: {
+          type: String,
+          value: ""
+        },
+
+        /**
+         * URL for the custom CSS to be loaded.
+         */
+        cssUrl: {
+          type: String
+        },
+
+        /**
+         * Date the visible timeline start.
+         */
+        start: {
+          type: String
+        },
+
+        /**
+         * Date the visible timeline ends (exclusive).
+         */
+        end: {
+          type: String
+        },
+
+        /**
+         * Enables clustering.
+         */
+        enableCluster: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        },
+        /**
+         * Connects the keyboard enter event to the startDateInput event when that element has the focus.
+         * @type {Object}
+         */
+        fetchOnEnterInput: {
+          type: Object,
+          value: function() {
+            return this.$.filterInput;
+          }
+        }
+
+      },
       
-      static get properties() {
-        
-        return {
-          
-          /**
-           * [data description]
-           * @type {Object}
-           */
-          _data: {
-            type: Array,
-            value: function() { return []; }
-          },
-
-          _filterString: {
-            type: String
-          },
-
-          /**
-           * URL for the custom CSS to be loaded.
-           */
-          cssUrl: {
-            type: String
-          },
-
-          /**
-           * Date the visible timeline start.
-           */
-          start: {
-            type: String
-          },
-
-          /**
-           * Date the visible timeline ends (exclusive).
-           */
-          end: {
-            type: String
-          },
-
-          /**
-           * This makes sure that clustering takes place.
-           * @type {Object}
-           */
-          cluster: {
-            type: Boolean,
-            reflectToAttribute: true,
-            value: false
-          },
-
-        };
-      }
-
-      static get observers() {
-        return [
-          "_dataChanged(_data.*)"
-        ]
-      }
-
-      /**
-       * Called when the element is upgraded (that is, when an element is created, 
-       * or when a previously-created element becomes defined).
-       * @return {[type]} [description]
-       */
-      constructor() {
-        super();
-      }
-
       /**
        * One time initialization.
        */
-      ready() {
-        super.ready();
+      ready: function() {
         
+        this._initDataset();
+
         if (!_.isEmpty(this.cssUrl)) {
           this._appendExternalStylesheet(this.cssUrl);
         }
@@ -147,8 +158,8 @@
         var options = {
           width:           "100%",
           height:          "125px",
-          cluster:         this.cluster,
-          clusterMaxItems: 1,
+          cluster:         this.enableCluster,
+          clusterMaxItems: 1
         };
         // Instantiate our timeline object.
         this._timeline = new links.Timeline(this.$.timeline, options);
@@ -157,56 +168,154 @@
           this._timeline.setVisibleChartRange(new Date(this.start), new Date(this.end), true);
         }
         this._installCallbacks();
-      }
+      },
 
-      _filter() {
-        console.log(this.$.channelInput.value);
-      }
+      /**
+       * Initializes the dataset instance.
+       */
+      _initDataset: function() {
+        this._events = new vis.DataSet(this._dsOptions);
+        this._installListeners();
+      },
+
+      /**
+       * Installs a change listener on the items dataset so that any changes are reflected in the simple Array.
+       */
+      _installListeners: function() {
+        this._events.on("*", function(event, properties, senderId) {
+          
+          this.debounce("update-events", function() {
+            this._rawEvents = this._events.get();
+            // this.set("_rawEvents", this._events.get());
+            // now re-draw the timeline
+            this._draw();
+          }.bind(this), 500);
+          
+        }.bind(this));
+      },
+
+      /**
+       * Invoked automatically when user types into the filter input. Delays execution 500ms.
+       */
+      _filterDelayed: function(e) {
+        this.debounce("filter-input", this._filter, 500);
+      },
+
+      /**
+       * Filters out the station that are currently visibly in range.
+       */
+      _filter: function(e) {
+
+        var range = this._timeline.getVisibleChartRange();
+        
+        var filterStartEnd = { filter: function (event) { 
+          return this._isInRange(range, event) && this._matchesStation(this.$.filterInput.value, event);
+        }.bind(this) };
+        
+        this._rawEvents = this._events.get(filterStartEnd)
+
+      },
 
       /**
        * Lodas the external stylesheet configured by the user.
        */
-      _appendExternalStylesheet(url) {
+      _appendExternalStylesheet: function(url) {
         var fileref=document.createElement("link");
         fileref.setAttribute("rel", "stylesheet");
         fileref.setAttribute("type", "text/css");
         fileref.setAttribute("href", url);
         this.shadowRoot.appendChild(fileref);
-      }
+      },
 
       /**
        * Sets the callback methods needed for hover/click events.
        */
-      _installCallbacks() {
+      _installCallbacks: function() {
+        // adds the listener to the timeline instance
+        links.events.addListener(this._timeline, "rangechanged", function(range) {
+          var filterStartEnd = { filter: function (event) { return this._isInRange(range, event); }.bind(this) };
+          this._rawEvents = this._events.get(filterStartEnd)
+        }.bind(this));
         this._timeline.mouseoverItemEventCallback = this._mouseoverItemEventCallback;
         this._timeline.clickItemEventCallback     = this._clickItemEventCallback;
-      }
+      },
+
+      _matchesStation: function(station, event) {
+        
+        if (_.isEmpty(station)) {
+          return true;
+        } else {
+          // station is set
+          if (_.isEmpty(event.station)) {
+            return false;
+          }
+          var regex = new RegExp(station);
+          return regex.test(event.station.toLowerCase());
+        }
+      },
+
+      /**
+       * Returns true if the event is inside
+       * 
+       * @param  {Object}  event object containing `start`, or `start` and `end` properties (Date)
+       */
+      _isInRange: function(range, event) {
+        if (event.end) {
+          // Time range
+          if (range.start <= event.start && event.end <= range.end) {
+              return true;
+          }
+        } else {
+          // Point object
+          if (range.start <= event.start && event.start <= range.end) {
+              return true;
+          }
+        }
+        return false;
+      },
 
       /**
        * Adds all the event objects in the array.
        */
-      addAll(eventObjectsArray) {
+      addAll: function(eventObjectsArray) {
         _.each(eventObjectsArray, function(eo) {
-          this.addEvent(eo);
+          this.add(eo, false);
         }.bind(this))
-      }
+      },
 
       /**
        * Adds an event to the list timeline if it passes the validation.
        */
-      addEvent(eventObject) {
+      add: function(eventObject) {
         if (eventObject) {
           var validation = this._validateRequiredProperties(eventObject);
           if(validation.isValid) {
-            this.push("_data", this._extendEventObjectIfNecessary(eventObject));
+            this._events.update(this._extendEventObjectIfNecessary(eventObject));
           }
         }
-      }
+      },
+
+      /**
+       * Re-draws the timeline.
+       */
+      _draw: function() {
+
+        var data = _.map(this._rawEvents, function(d) { 
+          // add a reference to each item to the timeline instance (for callback methods)
+          d.timelineRef = this._timeline;
+          return d;
+        }.bind(this));
+        
+        this.async(function() { 
+          this._timeline.draw(data);
+        }.bind(this), 1);
+        
+      },
 
       /**
        * Makes sure that all necessary properties are set. Otherwise, init them with default values.
        */
-      _extendEventObjectIfNecessary(eventObject) {
+      _extendEventObjectIfNecessary: function(eventObject) {
         if (eventObject) {
           if (!_.has(eventObject, "content")) {
             eventObject.content = "";
@@ -214,12 +323,12 @@
         }
 
         return eventObject;
-      }
+      },
 
       /**
        * Validates each timeline object.
        */
-      _validateRequiredProperties(eventObject) {
+      _validateRequiredProperties: function(eventObject) {
         var validationObj = { isValid: true, msg: ""};
 
         if (!eventObject) {
@@ -233,53 +342,26 @@
 
         return validationObj;
 
-      }
-
-      /**
-       * Re-draws the timeline.
-       */
-      _draw() {
-        Polymer.RenderStatus.afterNextRender(this, function() {
-          // Draw our timeline with the created data and options
-          this._timeline.draw(_.map(this._data, function(d) { 
-            // add a reference to each item to the timeline instance (for callback methods)
-            d.timelineRef = this._timeline;
-            return d;
-          }.bind(this)));
-        });
-      }
-
-      /**
-       * Draws the timeline with the new data, including a 500ms delay.
-       */
-      _dataChanged(data) {
-        this._debouncer = Polymer.Debouncer.debounce(
-          this._debouncer, // initially undefined
-          Polymer.Async.timeOut.after(500),
-          function() { // callback
-            this._draw()
-          }.bind(this)
-        );
-        
-      }
+      },
 
       /**
        * Callback invoked when over an event icon.
        */
-      _mouseoverItemEventCallback(eventId) {
+      _mouseoverItemEventCallback: function(eventId) {
         console.log("hovered");
-      }
+      },
 
       /**
        * Callback invoked when an event icon is clicked.
        */
-      _clickItemEventCallback(eventId) {
+      _clickItemEventCallback: function(eventId) {
         console.log("clicked");
       }
 
-    }
 
-    window.customElements.define(EventTimeline.is, EventTimeline);
+    });
+  })();
+
 
   </script>
 </dom-module>

@@ -12,7 +12,9 @@
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../event-timeline.html">
 
-    <style is="custom-style" include="demo-pages-shared-styles"></style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+      
+    </style>
   </head>
   <body>
 
@@ -21,25 +23,25 @@
       <demo-snippet>
         <template>
           <!-- <event-timeline class="withDummyData" css-url="http://localhost:8080/components/event-timeline/test.css" cluster></event-timeline> -->
-          <event-timeline class="withDummyData" cluster></event-timeline>
+          <event-timeline class="withDummyData" enable-cluster></event-timeline>
         </template>
       </demo-snippet>
     </div>
 
+<!-- 
     <div class="vertical-section-container centered">
       <h3>Define your own CSS stylesheet</h3>
       <demo-snippet>
         <template>
-          <event-timeline class="withDummyData" cluster></event-timeline>
+          <event-timeline class="withDummyData" enable-cluster></event-timeline>
         </template>
       </demo-snippet>
     </div>
-<!-- 
     <div class="vertical-section-container centered">
       <h3>Event timeline with clustering enabled (contains all elements)</h3>
       <demo-snippet>
         <template>
-          <event-timeline class="withDummyData" cluster></event-timeline>
+          <event-timeline class="withDummyData" enable-cluster></event-timeline>
         </template>
       </demo-snippet>
     </div>
@@ -57,7 +59,7 @@
       <h3>Setting specific start/end date</h3>
       <demo-snippet>
         <template>
-          <event-timeline class="withDummyData" start="2010-08-22" end="2010-08-27" cluster></event-timeline>
+          <event-timeline class="withDummyData" start="2010-08-22" end="2010-08-27" enable-cluster></event-timeline>
         </template>
       </demo-snippet>
     </div>
@@ -65,73 +67,104 @@
 
     <script>
 
-      var timelines = document.getElementsByClassName("withDummyData");
-      for (var i = 0; i < timelines.length; i++) {
-        timelines[i].addAll(_generateDummyData());
-      }
+      setTimeout(function() {
+        var timelines = document.getElementsByClassName("withDummyData");
+        for (var i = 0; i < timelines.length; i++) {
+          timelines[i].addAll(_generateDummyData());
+        }
+      }, 1000);
+
+      // setTimeout(function() {
+      //   var timelines = document.getElementsByClassName("withDummyData");
+      //   for (var i = 0; i < timelines.length; i++) {
+      //     timelines[i].add({
+      //         'start': new Date(2010,7,22),
+      //         'className': 'type2',
+      //         'event_id': 10
+      //     });
+      //   }
+      // }, 2000);
 
 
       function _generateDummyData() {
         return [
             {
-                'start': new Date(2010,7,23),
-                // 'content': '',
-                'className': 'type2',
-                'event_id': 1
+                start    : new Date(2010,7,23),
+                className: "type2",
+                event_id : 1,
+                station  : "station1",
+                error    : 47
             },
             {
-                'start': new Date(2010,7,24),
-                'content': '',
-                'className': 'type3',
-                'event_id': 2
+                start: new Date(2010,7,24),
+                className : "type3",
+                event_id  : 2,
+                station     : "station2",
+                error    : 47
             },
             {
-                'start': new Date(2010,7,25),
-                'content': '',
-                'className': 'type1',
-                'event_id': 3
+                start     : new Date(2010,7,25),
+                content   : '',
+                className : 'type1',
+                event_id  : 3,
+                station     : "station1",
+                error    : 47
             },
             {
-                'start': new Date(2010,7,26),
-                'content': '',
-                'className': 'type1',
-                'event_id': 4
+                start     : new Date(2010,7,26),
+                content   : '',
+                className : 'type1',
+                event_id  : 4,
+                station     : "station1",
+                error    : 47
             },
             {
-                'start': new Date(2010,7,29),
-                'content': '',
-                'className': 'type3',
-                'event_id': 5
+                start     : new Date(2010,7,29),
+                content   : '',
+                className : 'type3',
+                event_id  : 5,
+                station     : "station1",
+                error    : 47
             },
             {
-                'start': new Date(2010,7,30),
-                'content': '',
-                'className': 'type2',
-                'event_id': 6
+                start     : new Date(2010,7,30),
+                content   : '',
+                className : 'type2',
+                event_id  : 6,
+                station     : "station2",
+                error    : 47
             },
             {
-                'start': new Date(2010,8,4),
-                'content': '',
-                'className': 'type3',
-                'event_id': 7
+                start     : new Date(2010,8,4),
+                content   : '',
+                className : 'type3',
+                event_id : 7,
+                station     : "station2",
+                error    : 47
             },
             {
-                'start': new Date(2010,8,5),
-                'content': '',
-                'className': 'type3',
-                'event_id': 8
+                start     : new Date(2010,8,5),
+                content   : '',
+                className : 'type3',
+                event_id  : 8,
+                station     : "station2",
+                error    : 47
             },
             {
-                'start': new Date(2010,8,6),
-                'content': '',
-                'className': 'type4',
-                'event_id': 9
+                start     : new Date(2010,8,6),
+                content   : '',
+                className : 'type4',
+                event_id  : 9,
+                station     : "station2",
+                error    : 47
             },
             {
-                'start': new Date(2010,8,9),
-                'content': '',
-                'className': 'type3',
-                'event_id': 10
+                start     : new Date(2010,8,9),
+                content   : '',
+                className : 'type3',
+                event_id  : 10,
+                station     : "station2",
+                error    : 47
             }
         ];
       };

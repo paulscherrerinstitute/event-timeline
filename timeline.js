@@ -3900,15 +3900,19 @@ links.Timeline.ItemBox.prototype.updateDOM = function () {
             links.Timeline.addClassName(divDot, this.className);
         }
 
-        links.Timeline.addEventListener(divDot, 'mouseover', function() {
+        links.Timeline.addEventListener(divDot, "mouseover", function() {
           if(this.timelineRef.mouseoverItemEventCallback !== undefined) { 
+            
             this.timelineRef.mouseoverItemEventCallback(this.event_id);
+
           }
         }.bind(this));
 
-        links.Timeline.addEventListener(divDot, 'click', function() {
+        links.Timeline.addEventListener(divDot, "click", function() {
           if(this.timelineRef.clickItemEventCallback !== undefined) {
+            
             this.timelineRef.clickItemEventCallback(this.event_id);
+
           }
         }.bind(this));
 
@@ -5899,10 +5903,9 @@ links.Timeline.ClusterGenerator.prototype.getClusters = function (scale, maxItem
                         }
 
                         var cluster;
-                        var title = 'Cluster containing ' + count +
-                            ' events. Zoom in to see the individual events.';
+                        var title   = 'Cluster containing ' + count + ' events. Zoom in to see the individual events.';
                         var content = '<div title="' + title + '">' + count + '</div>';
-                        var group = item.group ? item.group.content : undefined;
+                        var group   = item.group ? item.group.content : undefined;
                         
                         //custom code: for keep track of cluster class
                         var classNames = clusterItems.map(function(item) {
@@ -5916,17 +5919,17 @@ links.Timeline.ClusterGenerator.prototype.getClusters = function (scale, maxItem
 
                         
                         if (classNames.indexOf("type1") > -1) {
-                            clusterClassName = "type1";
+                            clusterClassName  = "type1";
                             selectedItemIndex = classNames.indexOf("type1");
-                        } else if(classNames.indexOf('type2') > -1) {
-                            clusterClassName = 'type2';
-                            selectedItemIndex = classNames.indexOf('type2');
-                        } else if(classNames.indexOf('type3') > -1) {
-                            clusterClassName = 'type3';
-                            selectedItemIndex = classNames.indexOf('type3');
-                        } else if(classNames.indexOf('type4') > -1) {
-                            clusterClassName = 'type4';
-                            selectedItemIndex = classNames.indexOf('type4');
+                        } else if(classNames.indexOf("type2") > -1) {
+                            clusterClassName  = "type2";
+                            selectedItemIndex = classNames.indexOf("type2");
+                        } else if(classNames.indexOf("type3") > -1) {
+                            clusterClassName  = "type3";
+                            selectedItemIndex = classNames.indexOf("type3");
+                        } else if(classNames.indexOf("type4") > -1) {
+                            clusterClassName  = "type4";
+                            selectedItemIndex = classNames.indexOf("type4");
                         }
                       
                         var eventId = clusterItems[selectedItemIndex].event_id;
@@ -5934,24 +5937,27 @@ links.Timeline.ClusterGenerator.prototype.getClusters = function (scale, maxItem
                         if (containsRanges) {
                             // boxes and/or ranges
                             cluster = this.timeline.createItem({
-                                'start': new Date(min),
-                                'end': new Date(max),
-                                'content': content,
-                                'group': group
+                                start   : new Date(min),
+                                end     : new Date(max),
+                                content : content,
+                                group   : group
                             });
                         }
                         else {
                             // boxes only
                             cluster = this.timeline.createItem({
-                                'start': new Date(avg),
-                                'content': content,
-                                'group': group,
-                                'event_id': eventId
+                                start    : new Date(avg),
+                                content  : content,
+                                group    : group,
+                                event_id : eventId
                             });
                         }
 
                         cluster.isCluster = true;
                         cluster.items = clusterItems;
+                        if (clusterItems.length > 0) {
+                            cluster.timelineRef = clusterItems[0].timelineRef;
+                        }
 
                         cluster.items.forEach(function (item) {
                             item.cluster = cluster;

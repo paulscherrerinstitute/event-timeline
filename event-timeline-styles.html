@@ -1,4 +1,6 @@
-<dom-module id='timeline-styles'>
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="event-timeline-styles">
   <template>
     <style>
 
@@ -315,6 +317,22 @@
 
       .event.highlighted{
           background-color: #fff;
+      }
+      
+      .timeline-event-dot.type1 {
+          background: url('img/error.svg') no-repeat;
+      }
+      
+      .timeline-event-dot.type2 {
+          background: url('img/warning.svg') no-repeat !important;
+      }
+      
+      .timeline-event-dot.type3 {
+          background: url('img/normal.svg') no-repeat;
+      }
+      
+      .timeline-event-dot.type4 {
+          background: url('img/maintenance.svg') no-repeat !important;
       }
 
 
