@@ -186,7 +186,7 @@
           
           this.debounce("update-events", function() {
             this._rawEvents = this._events.get();
-            // this.set("_rawEvents", this._events.get());
+            this.$.filterInput.value = "";
             // now re-draw the timeline
             this._draw();
           }.bind(this), 500);
@@ -212,8 +212,8 @@
           return this._isInRange(range, event) && this._matchesStation(this.$.filterInput.value, event);
         }.bind(this) };
         
-        this._rawEvents = this._events.get(filterStartEnd)
-
+        this._rawEvents = this._events.get(filterStartEnd);
+        this._draw(); // make sure we remove the elements from the timeline too
       },
 
       /**
@@ -233,13 +233,23 @@
       _installCallbacks: function() {
         // adds the listener to the timeline instance
         links.events.addListener(this._timeline, "rangechanged", function(range) {
-          var filterStartEnd = { filter: function (event) { return this._isInRange(range, event); }.bind(this) };
+          
+          var filterStartEnd = { filter: function (event) { 
+            return this._isInRange(range, event) && this._matchesStation(this.$.filterInput.value, event);
+          }.bind(this) };
           this._rawEvents = this._events.get(filterStartEnd)
         }.bind(this));
         this._timeline.mouseoverItemEventCallback = this._mouseoverItemEventCallback;
         this._timeline.clickItemEventCallback     = this._clickItemEventCallback;
       },
 
+      /**
+       * Returns true if 1) no station has been specified or the regular expression of the 
+       * specified station matches the station value in the `event` object.
+       * 
+       * @param  {String} station name of the station to be tested against
+       * @param  {Object} event   object as saved in the `_events` array
+       */
       _matchesStation: function(station, event) {
         
         if (_.isEmpty(station)) {
