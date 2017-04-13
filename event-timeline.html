@@ -52,7 +52,7 @@
         items="[[_rawEvents]]"
         hidden$="[[!_rawEvents.length]]" >
         <template>
-          <event-timeline-item event="{{item}}" eventid$="[[item.event_id]]"></event-timeline-item>
+          <event-timeline-item event="[[item]]" eventid$="[[item.event_id]]"></event-timeline-item>
         </template>
       </iron-list>
     </div>
@@ -218,7 +218,7 @@
        * Lodas the external stylesheet configured by the user.
        */
       _appendExternalStylesheet: function(url) {
-        var fileref=document.createElement("link");
+        var filere = document.createElement("link");
         fileref.setAttribute("rel", "stylesheet");
         fileref.setAttribute("type", "text/css");
         fileref.setAttribute("href", url);
@@ -282,6 +282,16 @@
           }
         }
         return false;
+      },
+
+      /**
+       * Clears all events.
+       */
+      clear: function(redraw) {
+        this._events.clear();
+        if (redraw) {
+          this._draw();
+        }
       },
 
       /**

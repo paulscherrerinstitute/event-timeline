@@ -41,6 +41,22 @@
 
         });
 
+        test('clear', function() {
+          var element = fixture('basic');
+          element.addAll([
+            { event_id: 1 },
+            { event_id: 2 },
+            { event_id: 3 },
+            { event_id: 4 }
+          ]);
+          var event = element.getAll();
+          assert.isTrue(event.length === 4);
+
+          element.clear(false);
+          event = element.getAll();
+          assert.isTrue(event.length === 0);
+        });
+
         test('_matchesStation', function() {
           var element = fixture('basic');
           assert.isTrue(element._matchesStation(undefined, { }));
