@@ -205,15 +205,13 @@
        * Filters out the station that are currently visibly in range.
        */
       _filter: function(e) {
-
         var range = this._timeline.getVisibleChartRange();
-        
         var filterStartEnd = { filter: function (event) { 
           return this._isInRange(range, event) && this._matchesStation(this.$.filterInput.value, event);
         }.bind(this) };
         
         this._rawEvents = this._events.get(filterStartEnd);
-        this._draw(); // make sure we remove the elements from the timeline too
+        this._draw(); // make sure we update the elements from the timeline too
       },
 
       /**
@@ -237,7 +235,10 @@
           var filterStartEnd = { filter: function (event) { 
             return this._isInRange(range, event) && this._matchesStation(this.$.filterInput.value, event);
           }.bind(this) };
-          this._rawEvents = this._events.get(filterStartEnd)
+          
+          this._rawEvents = this._events.get(filterStartEnd);
+          this._draw(); // make sure we update the elements from the timeline too
+
         }.bind(this));
         this._timeline.mouseoverItemEventCallback = this._mouseoverItemEventCallback;
         this._timeline.clickItemEventCallback     = this._clickItemEventCallback;
@@ -251,7 +252,6 @@
        * @param  {Object} event   object as saved in the `_events` array
        */
       _matchesStation: function(station, event) {
-        
         if (_.isEmpty(station)) {
           return true;
         } else {
