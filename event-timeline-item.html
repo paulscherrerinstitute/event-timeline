@@ -19,6 +19,11 @@
     <style>
       :host {
         display: block;
+        background-color: transparent;
+        transition: background-color 1s linear;
+      }
+      :host[highlighted] {
+        background-color: yellow;
       }
     </style>
     
@@ -45,10 +50,38 @@
       properties: {
         
         event: {
-          type: Object
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * Adds a CSS hightlight animation.
+         */
+        highlighted: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true,
+        },
+
+        /**
+         * Animation duration in milliseconds.
+         * @type {Object}
+         */
+        _highlightedAnimationTime: {
+          type: Number,
+          value: 500
         }
 
       },
+
+      setHighlighted: function() {
+        if (!_.isEmpty(this.event)) {
+          this.highlighted = true;
+          setTimeout(function() {
+            this.highlighted = false;
+          }.bind(this), this._highlightedAnimationTime + 100);
+        }
+      }
 
     });
   })();

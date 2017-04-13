@@ -21,6 +21,26 @@
     <script>
       suite('event-timeline', function() {
         
+        test('add', function() {
+          var element = fixture('basic');
+          try {
+            // empty object
+            element.add({ });
+          } catch(err) {
+            assert.isTrue(true)
+          }
+
+          try {
+            // empty object
+            element.add({ event_id: 1 });
+            var event = element.getByIds([ 1 ], [ { event_id: 1 } ]);
+            assert.isTrue(event.length === 1);
+          } catch(err) {
+            assert.isFalse(true)
+          }
+
+        });
+
         test('_matchesStation', function() {
           var element = fixture('basic');
           assert.isTrue(element._matchesStation(undefined, { }));
@@ -37,6 +57,29 @@
           assert.isFalse(element._matchesStation("test", { station: "bollocks"}));
           assert.isFalse(element._matchesStation("t.t", { station: "test"}));
 
+        });
+
+        test('getByIds', function() {
+          var element = fixture('basic');
+          
+          assert.isTrue(element.getByIds(undefined).length === 0, [{ event_id: 1 }]);
+          assert.isTrue(element.getByIds(null).length === 0, [{ event_id: 1 }]);
+          assert.isTrue(element.getByIds([]).length === 0, [{ event_id: 1 }]);
+          assert.isTrue(element.getByIds(["wrong-time"]).length === 0, [{ event_id: 1 }]);
+          
+          // adding elements - now we can look for elements
+          element.addAll([
+            { event_id: 1 },
+            { event_id: 2 },
+            { event_id: 3 },
+            { event_id: 4 }
+          ]);
+          var allEvents = element.getAll();
+
+          assert.isTrue(element.getByIds([ 0 ], allEvents).length === 0);
+          assert.isTrue(element.getByIds([ 0, 5 ], allEvents).length === 0);
+          assert.isTrue(element.getByIds([ 1 ], allEvents).length === 1);
+          assert.isTrue(element.getByIds([ 1, 2 ], allEvents).length === 2);
         });
 
       });

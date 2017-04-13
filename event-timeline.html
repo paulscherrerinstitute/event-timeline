@@ -10,8 +10,8 @@
 <link rel="import" href="../psi-external-deps/dependency-underscore.html">
 <link rel="import" href="../psi-external-deps/dependency-vis.html">
 
-<!-- <script type="text/javascript" src="timeline.js"></script> -->
-<script type="text/javascript" src="timeline.min.js"></script>
+<script type="text/javascript" src="timeline.js"></script>
+<!-- <script type="text/javascript" src="timeline.min.js"></script> -->
 
 <link rel="import" href="event-timeline-styles.html">
 <link rel="import" href="event-timeline-item.html">
@@ -49,12 +49,12 @@
 
     <div class="timelineEvents">
       <iron-list id="eventsList" class="eventsList"
-         items="[[_rawEvents]]"
-         hidden$="[[!_rawEvents.length]]" >
-         <template>
-           <event-timeline-item event="[[item]]"></event-timeline-item>
-         </template>
-        </iron-list>
+        items="[[_rawEvents]]"
+        hidden$="[[!_rawEvents.length]]" >
+        <template>
+          <event-timeline-item event="{{item}}" eventid$="[[item.event_id]]"></event-timeline-item>
+        </template>
+      </iron-list>
     </div>
 
   </template>
@@ -240,8 +240,8 @@
           this._draw(); // make sure we update the elements from the timeline too
 
         }.bind(this));
-        this._timeline.mouseoverItemEventCallback = this._mouseoverItemEventCallback;
-        this._timeline.clickItemEventCallback     = this._clickItemEventCallback;
+        this._timeline.mouseoverItemEventCallback = this._mouseoverItemEventCallback.bind(this);
+        this._timeline.clickItemEventCallback     = this._clickItemEventCallback.bind(this);
       },
 
       /**
@@ -285,6 +285,21 @@
       },
 
       /**
+       * Adds an event to the list timeline if it passes the validation.
+       */
+      add: function(eventObject) {
+        if (eventObject) {
+          eventObject = this._extendEventObjectIfNecessary(eventObject)
+          var validation = this._validateRequiredProperties(eventObject);
+          if(validation.isValid) {
+            this._events.update(eventObject);
+          } else {
+            throw new Error(validation.msg);
+          }
+        }
+      },
+
+      /**
        * Adds all the event objects in the array.
        */
       addAll: function(eventObjectsArray) {
@@ -294,15 +309,26 @@
       },
 
       /**
-       * Adds an event to the list timeline if it passes the validation.
+       * Returns a mutable list of all events.
        */
-      add: function(eventObject) {
-        if (eventObject) {
-          var validation = this._validateRequiredProperties(eventObject);
-          if(validation.isValid) {
-            this._events.update(this._extendEventObjectIfNecessary(eventObject));
-          }
+      getAll: function() {
+        return this._events.get();
+      },
+
+      /**
+       * Gets the events based on the field `event_id`.
+       * @param  {Array} eventIds Array of all event ids to be retrieved
+       */
+      getByIds: function(eventIds, eventsToCheck) {
+        if (eventIds) {
+
+          var filtered = _.filter(eventsToCheck, function (event) { 
+            // this O(n^2), however, we're not expecting huge lists so it should suffice
+            return _.contains(eventIds, event.event_id);
+          });
+          return filtered;
         }
+        return [];
       },
 
       /**
@@ -330,6 +356,9 @@
           if (!_.has(eventObject, "content")) {
             eventObject.content = "";
           }
+          if (!_.has(eventObject, "start")) {
+            eventObject.start = new Date();
+          }
         }
 
         return eventObject;
@@ -348,6 +377,9 @@
         } else if (!_.has(eventObject, "start")) {
           validationObj.isValid = false;
           validationObj.msg = "Field 'start' is missing.";
+        } else if (!_.has(eventObject, "event_id")) {
+          validationObj.isValid = false;
+          validationObj.msg = "Field 'event_id' is missing.";
         }
 
         return validationObj;
@@ -357,15 +389,22 @@
       /**
        * Callback invoked when over an event icon.
        */
-      _mouseoverItemEventCallback: function(eventId) {
-        console.log("hovered");
+      _mouseoverItemEventCallback: function(events) {
+        
+        _.each(this.getByIds(events, this._rawEvents), function(event) {
+          
+          var elem = this.$$('event-timeline-item[eventid="' + event.event_id + '"]');
+          elem.setHighlighted();
+
+        }.bind(this));
+
       },
 
       /**
        * Callback invoked when an event icon is clicked.
        */
-      _clickItemEventCallback: function(eventId) {
-        console.log("clicked");
+      _clickItemEventCallback: function(events) {
+        console.log("clicked: " + events);
       }
 
 

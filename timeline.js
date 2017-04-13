@@ -3903,7 +3903,7 @@ links.Timeline.ItemBox.prototype.updateDOM = function () {
         links.Timeline.addEventListener(divDot, "mouseover", function() {
           if(this.timelineRef.mouseoverItemEventCallback !== undefined) { 
             
-            this.timelineRef.mouseoverItemEventCallback(this.event_id);
+            this.timelineRef.mouseoverItemEventCallback(this._gatherEventIds(this.event_id, this.items));
 
           }
         }.bind(this));
@@ -3911,12 +3911,20 @@ links.Timeline.ItemBox.prototype.updateDOM = function () {
         links.Timeline.addEventListener(divDot, "click", function() {
           if(this.timelineRef.clickItemEventCallback !== undefined) {
             
-            this.timelineRef.clickItemEventCallback(this.event_id);
+            this.timelineRef.clickItemEventCallback(this._gatherEventIds(this.event_id, this.items));
 
           }
         }.bind(this));
 
         // TODO: apply selected className?
+    }
+};
+
+links.Timeline.ItemBox.prototype._gatherEventIds = function(eventId, items) {
+    if (items && items.length > 0) {
+        return items.map(function(item) { return item.event_id; });
+    } else {
+        return [ eventId ];
     }
 };
 
