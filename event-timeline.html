@@ -268,7 +268,7 @@
           if (_.isEmpty(event.station)) {
             return false;
           }
-          var regex = new RegExp(station);
+          var regex = new RegExp(station.toLowerCase());
           return regex.test(event.station.toLowerCase());
         }
       },

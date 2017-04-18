@@ -64,6 +64,9 @@
           assert.isTrue(element._matchesStation("", { station: ""}));
           assert.isTrue(element._matchesStation("", { station: "test"}));
           assert.isTrue(element._matchesStation("test", { station: "test"}));
+          assert.isTrue(element._matchesStation("TEST", { station: "test"}));
+          assert.isTrue(element._matchesStation("Test", { station: "test"}));
+          assert.isTrue(element._matchesStation("TeST", { station: "test"}));
           
           assert.isTrue(element._matchesStation("t*", { station: "test"}));
           assert.isTrue(element._matchesStation("t.*", { station: "test"}));
