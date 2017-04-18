@@ -33,6 +33,10 @@
         display: block;
       }
 
+      paper-input {
+        --paper-input-container-focus-color: #989fbd;
+      }
+
     </style>
     
     <iron-a11y-keys target="[[fetchOnEnterInput]]" keys="enter" on-keys-pressed="_filter"></iron-a11y-keys>
@@ -69,8 +73,7 @@
       properties: {
 
         /**
-         * [data description]
-         * @type {Object}
+         * Array of the currently displayed events - both in the timeline as well as the list.
          */
         _rawEvents: {
           type: Array,
@@ -96,9 +99,13 @@
           }
         },
 
-        _filterString: {
-          type: String,
-          value: ""
+        /**
+         * Contains all filter terms as a list.
+         * List gets automatically populated whenever the user inputs into the filter field
+         */
+        _filterList: {
+          type: Array,
+          value: function() { return []; }
         },
 
         /**
@@ -207,6 +214,8 @@
        * Invoked automatically when user types into the filter input. Delays execution 500ms.
        */
       _filterDelayed: function(e) {
+        var splitValues = this.$.filterInput.value.split(",");
+        this._filterList = _.map(splitValues, function(entry) { return entry.trim(); });
         this.debounce("filter-input", this._filter, 500);
       },
 
@@ -216,7 +225,7 @@
       _filter: function(e) {
         var range = this._timeline.getVisibleChartRange();
         var filterStartEnd = { filter: function (event) { 
-          return this._isInRange(range, event) && this._matchesStation(this.$.filterInput.value, event);
+          return this._isInRange(range, event) && this._matchesStation(this._filterList, event);
         }.bind(this) };
         
         this._rawEvents = this._events.get(filterStartEnd);
@@ -242,7 +251,7 @@
         links.events.addListener(this._timeline, "rangechanged", function(range) {
           
           var filterStartEnd = { filter: function (event) { 
-            return this._isInRange(range, event) && this._matchesStation(this.$.filterInput.value, event);
+            return this._isInRange(range, event) && this._matchesStation(this._filterList, event);
           }.bind(this) };
           
           this._rawEvents = this._events.get(filterStartEnd);
@@ -260,16 +269,22 @@
        * @param  {String} station name of the station to be tested against
        * @param  {Object} event   object as saved in the `_events` array
        */
-      _matchesStation: function(station, event) {
-        if (_.isEmpty(station)) {
+      _matchesStation: function(stationList, event) {
+        if (_.isEmpty(stationList)) {
           return true;
         } else {
           // station is set
           if (_.isEmpty(event.station)) {
             return false;
           }
-          var regex = new RegExp(station.toLowerCase());
-          return regex.test(event.station.toLowerCase());
+
+          var anyMatchList = _.map(stationList, function(station) {
+            var regex = new RegExp(station.toLowerCase());
+            return regex.test(event.station.toLowerCase());
+          });
+          // true if any of the matches is true
+          return _.some(anyMatchList);
+
         }
       },
 
@@ -282,12 +297,12 @@
         if (event.end) {
           // Time range
           if (range.start <= event.start && event.end <= range.end) {
-              return true;
+            return true;
           }
         } else {
           // Point object
           if (range.start <= event.start && event.start <= range.end) {
-              return true;
+            return true;
           }
         }
         return false;
@@ -348,6 +363,20 @@
           return filtered;
         }
         return [];
+      },
+
+      /**
+       * Gets the event index based on the field `event_id`.
+       * @param  {Array} eventIds Array of all event ids to be retrieved
+       */
+      getIndexByIds: function(eventIds, eventsToCheck) {
+        if (eventIds) {
+          
+          return _.findIndex(eventsToCheck, function(event) {
+            return _.contains(eventIds, event.event_id);
+          });
+        }
+        return -1;
       },
 
       /**
@@ -423,7 +452,17 @@
        * Callback invoked when an event icon is clicked.
        */
       _clickItemEventCallback: function(events) {
-        console.log("clicked: " + events);
+        
+        var index = this.getIndexByIds(events, this._rawEvents);
+        if (index > -1) {
+          this.$.eventsList.scrollToIndex(index);
+          
+          var elem = this.$$('event-timeline-item[eventid="' + this._rawEvents[index].event_id + '"]');
+          if (elem) {
+            elem.setHighlighted();
+          }
+        }
+
       }
 
 

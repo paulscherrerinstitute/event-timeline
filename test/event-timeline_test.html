@@ -57,24 +57,34 @@
           assert.isTrue(event.length === 0);
         });
 
-        test('_matchesStation', function() {
+        test('_matchesStation single', function() {
           var element = fixture('basic');
           assert.isTrue(element._matchesStation(undefined, { }));
-          assert.isTrue(element._matchesStation("", { }));
-          assert.isTrue(element._matchesStation("", { station: ""}));
-          assert.isTrue(element._matchesStation("", { station: "test"}));
-          assert.isTrue(element._matchesStation("test", { station: "test"}));
-          assert.isTrue(element._matchesStation("TEST", { station: "test"}));
-          assert.isTrue(element._matchesStation("Test", { station: "test"}));
-          assert.isTrue(element._matchesStation("TeST", { station: "test"}));
+          assert.isTrue(element._matchesStation([], { }));
+          assert.isTrue(element._matchesStation([], { station: ""}));
+          assert.isTrue(element._matchesStation([], { station: "test"}));
+          assert.isTrue(element._matchesStation(["test"], { station: "test"}));
+          assert.isTrue(element._matchesStation(["TEST"], { station: "test"}));
+          assert.isTrue(element._matchesStation(["Test"], { station: "test"}));
+          assert.isTrue(element._matchesStation(["TeST"], { station: "test"}));
           
-          assert.isTrue(element._matchesStation("t*", { station: "test"}));
-          assert.isTrue(element._matchesStation("t.*", { station: "test"}));
-          assert.isTrue(element._matchesStation("t.*t", { station: "test"}));
-          assert.isTrue(element._matchesStation("t*st", { station: "test"}));
+          assert.isTrue(element._matchesStation(["t*"], { station: "test"}));
+          assert.isTrue(element._matchesStation(["t.*"], { station: "test"}));
+          assert.isTrue(element._matchesStation(["t.*t"], { station: "test"}));
+          assert.isTrue(element._matchesStation(["t*st"], { station: "test"}));
           
-          assert.isFalse(element._matchesStation("test", { station: "bollocks"}));
-          assert.isFalse(element._matchesStation("t.t", { station: "test"}));
+          assert.isFalse(element._matchesStation(["test"], { station: "abc"}));
+          assert.isFalse(element._matchesStation(["t.t"], { station: "test"}));
+
+        });
+
+        test('_matchesStation multi', function() {
+          var element = fixture('basic');
+          assert.isFalse(element._matchesStation(["test"], { station: "abc"}));
+          assert.isFalse(element._matchesStation(["t*st", "abc"], { station: "other"}));
+          
+          assert.isTrue(element._matchesStation(["t*st", "abc"], { station: "abc"}));
+          assert.isTrue(element._matchesStation(["t*st", "ab*"], { station: "abc"}));
 
         });
 
@@ -99,6 +109,25 @@
           assert.isTrue(element.getByIds([ 0, 5 ], allEvents).length === 0);
           assert.isTrue(element.getByIds([ 1 ], allEvents).length === 1);
           assert.isTrue(element.getByIds([ 1, 2 ], allEvents).length === 2);
+        });
+
+        test('getIndexByIds', function() {
+          var element = fixture('basic');
+          
+          // adding elements - now we can look for elements
+          element.addAll([
+            { event_id: 1, pulse_id: 1 },
+            { event_id: 2, pulse_id: 2 },
+            { event_id: 3, pulse_id: 3 },
+            { event_id: 4, pulse_id: 4 }
+          ]);
+          var allEvents = element.getAll();
+
+          assert.isTrue(element.getIndexByIds([ 0 ], allEvents)    === -1);
+          assert.isTrue(element.getIndexByIds([ 0, 5 ], allEvents) === -1);
+          assert.isTrue(element.getIndexByIds([ 1 ], allEvents)    ===  0);
+          assert.isTrue(element.getIndexByIds([ 1, 2 ], allEvents) ===  0);
+          assert.isTrue(element.getIndexByIds([ 3 ], allEvents)    ===  2);
         });
 
       });
