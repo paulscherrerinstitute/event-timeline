@@ -32,7 +32,7 @@
 
           try {
             // empty object
-            element.add({ event_id: 1 });
+            element.add({ event_id: 1, pulse_id: 1 });
             var event = element.getByIds([ 1 ], [ { event_id: 1 } ]);
             assert.isTrue(event.length === 1);
           } catch(err) {
@@ -44,10 +44,10 @@
         test('clear', function() {
           var element = fixture('basic');
           element.addAll([
-            { event_id: 1 },
-            { event_id: 2 },
-            { event_id: 3 },
-            { event_id: 4 }
+            { event_id: 1, pulse_id: 1 },
+            { event_id: 2, pulse_id: 2 },
+            { event_id: 3, pulse_id: 3 },
+            { event_id: 4, pulse_id: 4 }
           ]);
           var event = element.getAll();
           assert.isTrue(event.length === 4);
@@ -85,10 +85,10 @@
           
           // adding elements - now we can look for elements
           element.addAll([
-            { event_id: 1 },
-            { event_id: 2 },
-            { event_id: 3 },
-            { event_id: 4 }
+            { event_id: 1, pulse_id: 1 },
+            { event_id: 2, pulse_id: 2 },
+            { event_id: 3, pulse_id: 3 },
+            { event_id: 4, pulse_id: 4 }
           ]);
           var allEvents = element.getAll();
 
