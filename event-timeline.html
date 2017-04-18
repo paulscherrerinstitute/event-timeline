@@ -163,10 +163,11 @@
         };
         // Instantiate our timeline object.
         this._timeline = new links.Timeline(this.$.timeline, options);
-        if (!_.isEmpty(this.start) && !_.isEmpty(this.end)) {
-          this._timeline.firstDraw = false; // overwrites the logic when draw() is first invoked
-          this._timeline.setVisibleChartRange(new Date(this.start), new Date(this.end), true);
-        }
+        // if (!_.isEmpty(this.start) && !_.isEmpty(this.end)) {
+        //   this._timeline.firstDraw = false; // overwrites the logic when draw() is first invoked
+        //   this._timeline.setVisibleChartRange(new Date(this.start), new Date(this.end), true);
+        // }
+        this._checkStartEnd();
         this._installCallbacks();
       },
 
@@ -187,11 +188,19 @@
           this.debounce("update-events", function() {
             this._rawEvents = this._events.get();
             this.$.filterInput.value = "";
+            this._checkStartEnd();
             // now re-draw the timeline
             this._draw();
           }.bind(this), 500);
           
         }.bind(this));
+      },
+
+      _checkStartEnd: function() {
+        if (!_.isEmpty(this.start) && !_.isEmpty(this.end)) {
+          this._timeline.firstDraw = false; // overwrites the logic when draw() is first invoked
+          this._timeline.setVisibleChartRange(new Date(this.start), new Date(this.end), true);
+        }
       },
 
       /**
