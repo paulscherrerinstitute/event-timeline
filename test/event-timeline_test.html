@@ -23,6 +23,12 @@
         
         test('add', function() {
           var element = fixture('basic');
+          element.classMapping = {
+            type1: ["1"],
+            type2: ["2"],
+            type3: ["3"],
+            type4: ["4"]
+          };
           try {
             // empty object
             element.add({ });
@@ -43,6 +49,12 @@
 
         test('clear', function() {
           var element = fixture('basic');
+          element.classMapping = {
+            type1: ["1"],
+            type2: ["2"],
+            type3: ["3"],
+            type4: ["4"]
+          };
           element.addAll([
             { event_id: 1, pulse_id: 1 },
             { event_id: 2, pulse_id: 2 },
@@ -59,6 +71,13 @@
 
         test('_matchesStation single', function() {
           var element = fixture('basic');
+          element.classMapping = {
+            type1: ["1"],
+            type2: ["2"],
+            type3: ["3"],
+            type4: ["4"]
+          };
+
           assert.isTrue(element._matchesStation(undefined, { }));
           assert.isTrue(element._matchesStation([], { }));
           assert.isTrue(element._matchesStation([], { station: ""}));
@@ -80,6 +99,13 @@
 
         test('_matchesStation multi', function() {
           var element = fixture('basic');
+          element.classMapping = {
+            type1: ["1"],
+            type2: ["2"],
+            type3: ["3"],
+            type4: ["4"]
+          };
+
           assert.isFalse(element._matchesStation(["test"], { station: "abc"}));
           assert.isFalse(element._matchesStation(["t*st", "abc"], { station: "other"}));
           
@@ -90,7 +116,12 @@
 
         test('getByIds', function() {
           var element = fixture('basic');
-          
+          element.classMapping = {
+            type1: ["1"],
+            type2: ["2"],
+            type3: ["3"],
+            type4: ["4"]
+          };
           assert.isTrue(element.getByIds(undefined).length === 0, [{ event_id: 1 }]);
           assert.isTrue(element.getByIds(null).length === 0, [{ event_id: 1 }]);
           assert.isTrue(element.getByIds([]).length === 0, [{ event_id: 1 }]);
@@ -113,7 +144,12 @@
 
         test('getIndexByIds', function() {
           var element = fixture('basic');
-          
+          element.classMapping = {
+            type1: ["1"],
+            type2: ["2"],
+            type3: ["3"],
+            type4: ["4"]
+          };
           // adding elements - now we can look for elements
           element.addAll([
             { event_id: 1, pulse_id: 1 },
@@ -128,6 +164,30 @@
           assert.isTrue(element.getIndexByIds([ 1 ], allEvents)    ===  0);
           assert.isTrue(element.getIndexByIds([ 1, 2 ], allEvents) ===  0);
           assert.isTrue(element.getIndexByIds([ 3 ], allEvents)    ===  2);
+        });
+
+        test('_createClassMapping', function() {
+          var element = fixture('basic');
+          element.classMapping = {
+            type1: ["1"],
+            type2: ["2"],
+            type3: ["3"],
+            type4: ["4"]
+          };
+          // this will create the inverted mapping
+          element.addAll([
+            { event_id: 1, pulse_id: 1, type: 1 }
+          ]);
+
+          assert.equal(Object.keys(element._invertedClassMapping).length, 4);
+          assert.equal(element._invertedClassMapping["1"], "type1");
+          assert.equal(element._invertedClassMapping["2"], "type2");
+          assert.equal(element._invertedClassMapping["3"], "type3");
+          assert.equal(element._invertedClassMapping["4"], "type4");
+
+          var elems = element.getAll();
+          assert.equal(elems[0].className, "type1");
+
         });
 
       });

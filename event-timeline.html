@@ -93,6 +93,62 @@
         },
 
         /**
+         * Mappings to the types of events:
+         *  * type1: errors
+         *  * type2: warnings
+         *  * type3: infos
+         *  * type4: maintenance
+         * 
+         * Mappings are configured as key - list pair, for example:
+         *  {
+         *    type1: ["1","2"],
+         *    type2: ["3"],
+         *    type3: ["4","5","6"],
+         *    type4: ["7","8"]
+         *  }
+         *
+         * These are only initialized with default data.
+         */
+        classMapping: {
+          type: Object
+          // value: function() { return {
+          //     type1: ["1"],
+          //     type2: ["2"],
+          //     type3: ["3"],
+          //     type4: ["4"]
+          //   };
+          // }
+        },
+
+        /**
+         * Contains the inverted mapping of the `classMapping` object.
+         *
+         * Based on the comment above from `classMapping` property, that would be:
+         * {
+         *  1 : "type1",
+         *  2 : "type1",
+         *  3 : "type2",
+         *  4 : "type3",
+         *  5 : "type3",
+         *  6 : "type3",
+         *  7 : "type4",
+         *  8 : "type4",
+         * }
+         */
+        _invertedClassMapping: {
+          type: Object
+        },
+
+        /**
+         * Property name in the provided event-objects which contains the value for deciding 
+         * what className to be used (through the mapping).
+         */
+        classMappingProperty: {
+          type: String,
+          value: "type"
+        },
+
+        /**
          * Array of the currently displayed events - both in the timeline as well as the list.
          */
         _rawEvents: {
@@ -217,6 +273,28 @@
           }.bind(this), 500);
           
         }.bind(this));
+      },
+
+      /**
+       * Inverts the class mapping.
+       */
+      _invertClassMapping: function() {
+
+        if (_.isEmpty(this.classMapping)) {
+          throw new Error("A class mapping must be specified.");
+        }
+        this._invertedClassMapping = {};
+
+        var nrOfEventTypes = _.size(this.classMapping);
+        for (var i = 1; i <= nrOfEventTypes; i++) {
+          var typeName = "type" + i;
+          if (_.has(this.classMapping, typeName)) {
+            var typeValues = this.classMapping[typeName];
+            _.each(typeValues, function(mappingEntry) {
+              this._invertedClassMapping[mappingEntry] = typeName;
+            }.bind(this))
+          }
+        }
       },
 
       /**
@@ -345,6 +423,11 @@
        * Adds an event to the list timeline if it passes the validation.
        */
       add: function(eventObject) {
+        
+        if (!_.isEmpty(this.classMapping)) {
+          this._invertClassMapping();
+        }
+
         if (eventObject) {
           eventObject = this._extendEventObjectIfNecessary(eventObject)
           var validation = this._validateRequiredProperties(eventObject);
@@ -420,6 +503,11 @@
        */
       _extendEventObjectIfNecessary: function(eventObject) {
         if (eventObject) {
+          
+          if (_.has(eventObject, this.classMappingProperty)) {
+            eventObject.className = this._invertedClassMapping[eventObject[this.classMappingProperty]];
+          }
+
           if (!_.has(eventObject, "content")) {
             eventObject.content = "";
           }
