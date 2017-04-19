@@ -172,10 +172,6 @@
         };
         // Instantiate our timeline object.
         this._timeline = new links.Timeline(this.$.timeline, options);
-        // if (!_.isEmpty(this.start) && !_.isEmpty(this.end)) {
-        //   this._timeline.firstDraw = false; // overwrites the logic when draw() is first invoked
-        //   this._timeline.setVisibleChartRange(new Date(this.start), new Date(this.end), true);
-        // }
         this._checkStartEnd();
         this._installCallbacks();
       },
@@ -205,6 +201,10 @@
         }.bind(this));
       },
 
+      /**
+       * [_checkStartEnd description]
+       * @return {[type]} [description]
+       */
       _checkStartEnd: function() {
         if (!_.isEmpty(this.start) && !_.isEmpty(this.end)) {
           this._timeline.firstDraw = false; // overwrites the logic when draw() is first invoked
@@ -259,7 +259,10 @@
           this._rawEvents = this._events.get(filterStartEnd);
           this._draw(); // make sure we update the elements from the timeline too
 
+          this.fire("timeline-move-zoom", range);
+
         }.bind(this));
+
         this._timeline.mouseoverItemEventCallback = this._mouseoverItemEventCallback.bind(this);
         this._timeline.clickItemEventCallback     = this._clickItemEventCallback.bind(this);
       },
@@ -357,7 +360,6 @@
        */
       getByIds: function(eventIds, eventsToCheck) {
         if (eventIds) {
-
           var filtered = _.filter(eventsToCheck, function (event) { 
             // this O(n^2), however, we're not expecting huge lists so it should suffice
             return _.contains(eventIds, event.event_id);
@@ -373,7 +375,6 @@
        */
       getIndexByIds: function(eventIds, eventsToCheck) {
         if (eventIds) {
-          
           return _.findIndex(eventsToCheck, function(event) {
             return _.contains(eventIds, event.event_id);
           });
@@ -385,7 +386,6 @@
        * Re-draws the timeline.
        */
       _draw: function() {
-
         var data = _.map(this._rawEvents, function(d) { 
           // add a reference to each item to the timeline instance (for callback methods)
           d.timelineRef = this._timeline;
@@ -395,7 +395,6 @@
         this.async(function() { 
           this._timeline.draw(data);
         }.bind(this), 1);
-        
       },
 
       /**
@@ -410,7 +409,6 @@
             eventObject.start = new Date();
           }
         }
-
         return eventObject;
       },
 
@@ -431,30 +429,23 @@
           validationObj.isValid = false;
           validationObj.msg = "Field 'event_id' is missing.";
         }
-
         return validationObj;
-
       },
 
       /**
        * Callback invoked when over an event icon.
        */
       _mouseoverItemEventCallback: function(events) {
-        
         _.each(this.getByIds(events, this._rawEvents), function(event) {
-          
           var elem = this.$$('event-timeline-item[eventid="' + event.event_id + '"]');
           elem.setHighlighted();
-
         }.bind(this));
-
       },
 
       /**
        * Callback invoked when an event icon is clicked.
        */
       _clickItemEventCallback: function(events) {
-        
         var index = this.getIndexByIds(events, this._rawEvents);
         if (index > -1) {
           this.$.eventsList.scrollToIndex(index);
@@ -464,7 +455,6 @@
             elem.setHighlighted();
           }
         }
-
       }
 
 
