@@ -5,6 +5,7 @@
 <link rel="import" href="../iron-list/iron-list.html">
 
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="../psi-external-deps/dependency-underscore.html">
@@ -38,6 +39,12 @@
       #filterInput {
         margin-bottom: 20px;
       }
+      .loader {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+        @apply(--layout-around-justified);
+        margin-top: 10px;
+      }
 
     </style>
     
@@ -50,10 +57,13 @@
         <paper-icon-button suffix icon="event-timeline-icons:search" on-tap="_filter"></paper-icon-button>
     </paper-input>
 
-
     <div id="timeline"></div>
 
-    <div class="timelineEvents">
+    <div class="loader" hidden$="[[!loading]]">
+      <paper-spinner active$="[[loading]]"></paper-spinner>
+    </div>
+
+    <div class="timelineEvents" hidden$="[[loading]]">
       <iron-list id="eventsList" class="eventsList"
         items="[[_rawEvents]]"
         hidden$="[[!_rawEvents.length]]" >
@@ -73,6 +83,14 @@
       is: "event-timeline", 
 
       properties: {
+
+        /**
+         * Displays the loading.
+         */
+        loading: {
+          type: Boolean,
+          value: false
+        },
 
         /**
          * Array of the currently displayed events - both in the timeline as well as the list.
