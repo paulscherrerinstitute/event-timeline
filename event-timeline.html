@@ -15,10 +15,12 @@
 <!-- <script type="text/javascript" src="timeline.min.js"></script> -->
 
 <link rel="import" href="event-timeline-styles.html">
+<link rel="import" href="event-types-styles.html">
 <link rel="import" href="event-timeline-item.html">
 <link rel="import" href="event-timeline-icons.html">
 
 <style is="custom-style" include="event-timeline-styles"></style>
+<style is="custom-style" include="event-type-styles"></style>
 <!--
 `event-timeline`
 
@@ -185,13 +187,6 @@
         },
 
         /**
-         * URL for the custom CSS to be loaded.
-         */
-        cssUrl: {
-          type: String
-        },
-
-        /**
          * Date the visible timeline start.
          */
         start: {
@@ -232,10 +227,6 @@
       ready: function() {
         
         this._initDataset();
-
-        if (!_.isEmpty(this.cssUrl)) {
-          this._appendExternalStylesheet(this.cssUrl);
-        }
 
         // specify options
         var options = {
@@ -328,17 +319,6 @@
         
         this._rawEvents = this._events.get(filterStartEnd);
         this._draw(); // make sure we update the elements from the timeline too
-      },
-
-      /**
-       * Lodas the external stylesheet configured by the user.
-       */
-      _appendExternalStylesheet: function(url) {
-        var fileref = document.createElement("link");
-        fileref.setAttribute("rel", "stylesheet");
-        fileref.setAttribute("type", "text/css");
-        fileref.setAttribute("href", url);
-        this.shadowRoot.appendChild(fileref);
       },
 
       /**

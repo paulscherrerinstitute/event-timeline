@@ -22,39 +22,56 @@
       <h3>Simple case</h3>
       <demo-snippet>
         <template>
-          <event-timeline class="withDummyData" enable-cluster nr-of-event-types="4" class-mapping-property="error"></event-timeline>
+          <event-timeline class="withDummyData" 
+              enable-cluster 
+              class-mapping-property="error"></event-timeline>
         </template>
       </demo-snippet>
     </div>
 
-    <div class="vertical-section-container centered">
+<!--     <div class="vertical-section-container centered">
       <h3>Define own mapping</h3>
       <demo-snippet>
         <template>
-          <event-timeline class="withDummyDataMapping" enable-cluster nr-of-event-types="4" class-mapping-property="error"></event-timeline>
+          <event-timeline class="withDummyDataMapping" 
+              enable-cluster 
+              class-mapping-property="error"></event-timeline>
         </template>
       </demo-snippet>
-    </div>
+    </div> -->
 
     <script>
 
       setTimeout(function() {
         var timelines = document.getElementsByClassName("withDummyData");
+        var mapping = {
+          type1 : ["1"],
+          type2 : ["2"],
+          type3 : ["3"],
+          type4 : ["4"]
+        };
         for (var i = 0; i < timelines.length; i++) {
+          timelines[i].classMapping = mapping;
           timelines[i].addAll(_generateDummyData());
         }
       }, 1000);
 
-      setTimeout(function() {
-        var timelines = document.getElementsByClassName("withDummyDataMapping");
-        for (var i = 0; i < timelines.length; i++) {
-          timelines[i].addAll(_generateDummyDataMapping());
-        }
-      }, 1000);
+      // setTimeout(function() {
+      //   var timelines = document.getElementsByClassName("withDummyDataMapping");
+      //   var mapping = {
+      //     type1 : ["1","2"],
+      //     type2 : ["3", "4"]
+      //   };
+      //   for (var i = 0; i < timelines.length; i++) {
+      //     var data = _generateDummyData();
+      //     timelines[i].classMapping = mapping;
+      //     timelines[i].addAll(data);
+      //   }
+      // }, 1000);
 
 
       function _generateDummyData() {
-        var num = 100, elems = [];
+        var num = 8, elems = [];
         for (var i = 1; i <= num; i++) {
           elems.push({
             pulse_id : i,
@@ -62,12 +79,12 @@
             start    : new Date(2010,7,23 + i),
             className: "type" + ((i % 4) + 1),
             station  : "station" + ((i % 4) + 1),
-            error    : ((i % 4) + 1)
+            error    : ((i % 4) + 1) + ""
           });
         }
         return elems;
       };
-      
+
     </script>
   </body>
 </html>
