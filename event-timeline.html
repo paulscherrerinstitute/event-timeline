@@ -543,15 +543,8 @@
        * Callback invoked when an event icon is clicked.
        */
       _clickItemEventCallback: function(events) {
-        var index = this.getIndexByIds(events, this._rawEvents);
-        if (index > -1) {
-          this.$.eventsList.scrollToIndex(index);
-          
-          var elem = this.$$('event-timeline-item[eventid="' + this._rawEvents[index].event_id + '"]');
-          if (elem) {
-            elem.setHighlighted();
-          }
-        }
+        // just invoke the mouse-over functionality
+        this._mouseoverItemEventCallback(events);
       }
 
 
