@@ -29,7 +29,7 @@
       </demo-snippet>
     </div>
 
-<!--     <div class="vertical-section-container centered">
+    <div class="vertical-section-container centered">
       <h3>Define own mapping</h3>
       <demo-snippet>
         <template>
@@ -38,7 +38,7 @@
               class-mapping-property="error"></event-timeline>
         </template>
       </demo-snippet>
-    </div> -->
+    </div>
 
     <script>
 
@@ -56,18 +56,18 @@
         }
       }, 1000);
 
-      // setTimeout(function() {
-      //   var timelines = document.getElementsByClassName("withDummyDataMapping");
-      //   var mapping = {
-      //     type1 : ["1","2"],
-      //     type2 : ["3", "4"]
-      //   };
-      //   for (var i = 0; i < timelines.length; i++) {
-      //     var data = _generateDummyData();
-      //     timelines[i].classMapping = mapping;
-      //     timelines[i].addAll(data);
-      //   }
-      // }, 1000);
+      setTimeout(function() {
+        var timelines = document.getElementsByClassName("withDummyDataMapping");
+        var mapping = {
+          type1 : ["1","2"],
+          type2 : ["3", "4"]
+        };
+        for (var i = 0; i < timelines.length; i++) {
+          var data = _generateDummyData();
+          timelines[i].classMapping = mapping;
+          timelines[i].addAll(data);
+        }
+      }, 1000);
 
 
       function _generateDummyData() {
