@@ -5808,6 +5808,34 @@ links.Timeline.ClusterGenerator.prototype.filterData = function () {
 };
 
 /**
+ * Sorts the class-names according to natural sorting laws, i.e.
+ * classNameSort(["type11", "type1", "type2"]) results in ["type1", "type2", "type11"]
+ 
+ * @param  {Array} classNames list of class names 
+ * @return {Array}            naturally sorted class names
+ */
+links.Timeline.ClusterGenerator.prototype.classNameSort = function (classNames) {
+    
+    var filteredClassNames = classNames.filter(function(className){
+      return className.match(/type([0-9]+)/g);
+    });
+
+    var regex = /type([0-9]+)/;
+    function _extractAndConvertNumber(str) {
+        var found = regex.exec(str);
+        if (found) {
+            return Number(found[1]);
+        }
+        return undefined;
+    }
+
+    return filteredClassNames.sort(function (left, right) {
+        var leftNumber = _extractAndConvertNumber(left), rightNumber = _extractAndConvertNumber(right);
+        return leftNumber < rightNumber ? -1 : leftNumber > rightNumber ? 1 : 0;
+    });
+};
+
+/**
  * Cluster the events which are too close together
  * @param {Number} scale     The scale of the current window,
  *                           defined as (windowWidth / (endDate - startDate))
@@ -5921,26 +5949,10 @@ links.Timeline.ClusterGenerator.prototype.getClusters = function (scale, maxItem
                         });
 
                         //custom code: picking highest one for cluster className
-                        //className order by : [undefined, 'yellow', 'green']
-                        var clusterClassName = undefined;
-                        var selectedItemIndex = 0;
-
-                        
-                        if (classNames.indexOf("type1") > -1) {
-                            clusterClassName  = "type1";
-                            selectedItemIndex = classNames.indexOf("type1");
-                        } else if(classNames.indexOf("type2") > -1) {
-                            clusterClassName  = "type2";
-                            selectedItemIndex = classNames.indexOf("type2");
-                        } else if(classNames.indexOf("type3") > -1) {
-                            clusterClassName  = "type3";
-                            selectedItemIndex = classNames.indexOf("type3");
-                        } else if(classNames.indexOf("type4") > -1) {
-                            clusterClassName  = "type4";
-                            selectedItemIndex = classNames.indexOf("type4");
-                        }
-                      
-                        var eventId = clusterItems[selectedItemIndex].event_id;
+                        //classNames ordered by : ['type1', "type2",...,'typeN']
+                        var clusterClassName = this.classNameSort(classNames)[0];
+                        // get the index of the highest-ranked class in the original list of class names
+                        var eventId = clusterItems[classNames.indexOf(clusterClassName)].event_id;
 
                         if (containsRanges) {
                             // boxes and/or ranges

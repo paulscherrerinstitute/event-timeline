@@ -59,13 +59,12 @@
       setTimeout(function() {
         var timelines = document.getElementsByClassName("withDummyDataMapping");
         var mapping = {
-          type1 : ["1","2"],
-          type2 : ["3", "4"]
+          type2 : ["1","2"],
+          type5 : ["3", "4"]
         };
         for (var i = 0; i < timelines.length; i++) {
-          var data = _generateDummyData();
           timelines[i].classMapping = mapping;
-          timelines[i].addAll(data);
+          timelines[i].addAll(_generateDummyData());
         }
       }, 1000);
 

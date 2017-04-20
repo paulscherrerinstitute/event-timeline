@@ -276,8 +276,18 @@
         }
         this._invertedClassMapping = {};
 
-        var nrOfEventTypes = _.size(this.classMapping);
-        for (var i = 1; i <= nrOfEventTypes; i++) {
+        var regex = /type([0-9]+)/;
+        function _extractAndConvertNumber(str) {
+          var found = regex.exec(str);
+          if (found) {
+              return Number(found[1]);
+          }
+          return undefined;
+        }
+        
+        var allNumbers = _.reject(_.map(Object.keys(this.classMapping), _extractAndConvertNumber), function(numb) { return numb === undefined; });
+
+        _.each(allNumbers, function(i) {
           var typeName = "type" + i;
           if (_.has(this.classMapping, typeName)) {
             var typeValues = this.classMapping[typeName];
@@ -285,7 +295,8 @@
               this._invertedClassMapping[mappingEntry] = typeName;
             }.bind(this))
           }
-        }
+        }.bind(this));
+
       },
 
       /**
