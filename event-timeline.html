@@ -549,7 +549,9 @@
       _mouseoverItemEventCallback: function(events) {
         _.each(this.getByIds(events, this._rawEvents), function(event) {
           var elem = this.$$('event-timeline-item[eventid="' + event.event_id + '"]');
-          elem.setHighlighted();
+          if (elem) {
+            elem.setHighlighted();
+          }
         }.bind(this));
       },
 
