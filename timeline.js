@@ -4428,13 +4428,13 @@ links.Timeline.ItemFloatingRange.prototype.isVisible = function (start, end) {
         return false;
     }
 
-	// NH check for no end value
-	if (this.end && this.start) {
-		return (this.end > start)
-			&& (this.start < end);
-	} else if (this.start) {
-		return (this.start < end);
-	} else if (this.end) {
+    // NH check for no end value
+    if (this.end && this.start) {
+        return (this.end > start)
+            && (this.start < end);
+    } else if (this.start) {
+        return (this.start < end);
+    } else if (this.end) {
         return (this.end > start);
     } else {return true;}
 };
@@ -4465,11 +4465,11 @@ links.Timeline.ItemFloatingRange.prototype.setPosition = function (left, right) 
  */
 links.Timeline.ItemFloatingRange.prototype.getLeft = function (timeline) {
     // NH check for no start value
-	if (this.start) {
-		return timeline.timeToScreen(this.start);
-	} else {
-		return 0;
-	}
+    if (this.start) {
+        return timeline.timeToScreen(this.start);
+    } else {
+        return 0;
+    }
 };
 
 /**
@@ -4480,11 +4480,11 @@ links.Timeline.ItemFloatingRange.prototype.getLeft = function (timeline) {
  */
 links.Timeline.ItemFloatingRange.prototype.getRight = function (timeline) {
     // NH check for no end value
-	if (this.end) {
-		return timeline.timeToScreen(this.end);
-	} else {
-		return timeline.size.contentWidth;
-	}
+    if (this.end) {
+        return timeline.timeToScreen(this.end);
+    } else {
+        return timeline.size.contentWidth;
+    }
 };
 
 /**
@@ -5013,14 +5013,14 @@ links.Timeline.prototype.getGroup = function (groupName) {
             groups = groups.sort(function (a, b) {
                 if (a.content > b.content) {
                     return 1;
-		        }
-		        if (a.content < b.content) {
-		            return -1;
-		        }
-		        return 0;
-        	});
+                }
+                if (a.content < b.content) {
+                    return -1;
+                }
+                return 0;
+            });
         } else if (typeof(this.options.groupsOrder) == "function") {
-        	groups = groups.sort(this.options.groupsOrder)
+            groups = groups.sort(this.options.groupsOrder)
         }
 
         // rebuilt the groupIndexes
@@ -5945,6 +5945,9 @@ links.Timeline.ClusterGenerator.prototype.getClusters = function (scale, maxItem
                         
                         //custom code: for keep track of cluster class
                         var classNames = clusterItems.map(function(item) {
+                            if (!item.className) {
+                                item.className = "type2"; // if no mapping has been defined, set it to warning
+                            }
                             return item.className;
                         });
 
@@ -5979,12 +5982,12 @@ links.Timeline.ClusterGenerator.prototype.getClusters = function (scale, maxItem
                             cluster.timelineRef = clusterItems[0].timelineRef;
                         }
 
-                        cluster.items.forEach(function (item) {
-                            item.cluster = cluster;
-                        });
 
                         //custom code: assigning highest order className to the cluster
                         cluster.className = clusterClassName;
+                        cluster.items.forEach(function (item) {
+                            item.cluster = cluster;
+                        });
 
                         clusters.push(cluster);
                         i += num;

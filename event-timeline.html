@@ -152,6 +152,15 @@
         },
 
         /**
+         * In case there is no mapping for a particular error,
+         * this is the default class which gets assigned.
+         */
+        _DEFAULT_CLASS_NAME: {
+          type: String,
+          value: "type2"
+        },
+
+        /**
          * Array of the currently displayed events - both in the timeline as well as the list.
          */
         _rawEvents: {
@@ -499,6 +508,9 @@
           
           if (_.has(eventObject, this.classMappingProperty)) {
             eventObject.className = this._invertedClassMapping[eventObject[this.classMappingProperty]];
+            if (!eventObject.className) {
+              eventObject.className = this._DEFAULT_CLASS_NAME;
+            }
           }
 
           if (!_.has(eventObject, "content")) {
