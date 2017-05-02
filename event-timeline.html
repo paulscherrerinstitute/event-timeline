@@ -19,6 +19,7 @@
 <link rel="import" href="event-timeline-item.html">
 <link rel="import" href="event-timeline-icons.html">
 
+
 <style is="custom-style" include="event-timeline-styles"></style>
 <style is="custom-style" include="event-type-styles"></style>
 <!--
@@ -255,54 +256,18 @@
        */
       _installListeners: function() {
         this._events.on("*", function(event, properties, senderId) {
-          
+          this.loading = true;
           this.debounce("update-events", function() {
-            this._rawEvents = this._events.get();
-            this.$.filterInput.value = "";
             this._checkStartEnd();
-            // now re-draw the timeline
-            this._draw();
+            this._filter(null);
           }.bind(this), 500);
           
         }.bind(this));
       },
 
       /**
-       * Inverts the class mapping.
-       */
-      _invertClassMapping: function() {
-
-        if (_.isEmpty(this.classMapping)) {
-          throw new Error("A class mapping must be specified.");
-        }
-        this._invertedClassMapping = {};
-
-        var regex = /type([0-9]+)/;
-        function _extractAndConvertNumber(str) {
-          var found = regex.exec(str);
-          if (found) {
-              return Number(found[1]);
-          }
-          return undefined;
-        }
-        
-        var allNumbers = _.reject(_.map(Object.keys(this.classMapping), _extractAndConvertNumber), function(numb) { return numb === undefined; });
-
-        _.each(allNumbers, function(i) {
-          var typeName = "type" + i;
-          if (_.has(this.classMapping, typeName)) {
-            var typeValues = this.classMapping[typeName];
-            _.each(typeValues, function(mappingEntry) {
-              this._invertedClassMapping[mappingEntry] = typeName;
-            }.bind(this))
-          }
-        }.bind(this));
-
-      },
-
-      /**
-       * [_checkStartEnd description]
-       * @return {[type]} [description]
+       * Checks whether the start / end properties have been set and if so, 
+       * sets the visible chart range accordingly.
        */
       _checkStartEnd: function() {
         if (!_.isEmpty(this.start) && !_.isEmpty(this.end)) {
@@ -315,8 +280,6 @@
        * Invoked automatically when user types into the filter input. Delays execution 500ms.
        */
       _filterDelayed: function(e) {
-        var splitValues = this.$.filterInput.value.split(",");
-        this._filterList = _.map(splitValues, function(entry) { return entry.trim(); });
         this.debounce("filter-input", this._filter, 500);
       },
 
@@ -324,13 +287,24 @@
        * Filters out the station that are currently visibly in range.
        */
       _filter: function(e) {
+        var splitValues = this.$.filterInput.value.split(",");
+        this._filterList = _.map(splitValues, function(entry) { return entry.trim(); });
         var range = this._timeline.getVisibleChartRange();
+        this._filterInternal(range);
+      },
+
+      /**
+       * Filters the events and populates the rawEvents property.
+       */
+      _filterInternal: function(range) {
+        
         var filterStartEnd = { filter: function (event) { 
           return this._isInRange(range, event) && this._matchesStation(this._filterList, event);
         }.bind(this) };
         
         this._rawEvents = this._events.get(filterStartEnd);
         this._draw(); // make sure we update the elements from the timeline too
+        this.loading = false;
       },
 
       /**
@@ -339,16 +313,10 @@
       _installCallbacks: function() {
         // adds the listener to the timeline instance
         links.events.addListener(this._timeline, "rangechanged", function(range) {
-          
-          var filterStartEnd = { filter: function (event) { 
-            return this._isInRange(range, event) && this._matchesStation(this._filterList, event);
-          }.bind(this) };
-          
-          this._rawEvents = this._events.get(filterStartEnd);
-          this._draw(); // make sure we update the elements from the timeline too
-
-          this.fire("timeline-move-zoom", range);
-
+          this.debounce("rangechanged-filter", function() { 
+            this._filterInternal(range);
+            this.fire("timeline-move-zoom", range);
+          }.bind(this), 500);
         }.bind(this));
 
         this._timeline.mouseoverItemEventCallback = this._mouseoverItemEventCallback.bind(this);
@@ -406,6 +374,7 @@
        */
       clear: function(redraw) {
         this._events.clear();
+        this._rawEvents = [];
         if (redraw) {
           this._draw();
         }
@@ -488,6 +457,38 @@
         this.async(function() { 
           this._timeline.draw(data);
         }.bind(this), 1);
+      },
+
+      /**
+       * Inverts the class mapping.
+       */
+      _invertClassMapping: function() {
+
+        if (_.isEmpty(this.classMapping)) {
+          throw new Error("A class mapping must be specified.");
+        }
+        this._invertedClassMapping = {};
+
+        var regex = /type([0-9]+)/;
+        function _extractAndConvertNumber(str) {
+          var found = regex.exec(str);
+          if (found) {
+              return Number(found[1]);
+          }
+          return undefined;
+        }
+        
+        var allNumbers = _.reject(_.map(Object.keys(this.classMapping), _extractAndConvertNumber), function(numb) { return numb === undefined; });
+
+        _.each(allNumbers, function(i) {
+          var typeName = "type" + i;
+          if (_.has(this.classMapping, typeName)) {
+            var typeValues = this.classMapping[typeName];
+            _.each(typeValues, function(mappingEntry) {
+              this._invertedClassMapping[mappingEntry] = typeName;
+            }.bind(this))
+          }
+        }.bind(this));
       },
 
       /**
