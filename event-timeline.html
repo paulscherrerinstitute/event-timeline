@@ -288,7 +288,7 @@
        */
       _filter: function(e) {
         var splitValues = this.$.filterInput.value.split(",");
-        this._filterList = _.map(splitValues, function(entry) { return entry.trim(); });
+        this._filterList = _.reject(_.map(splitValues, function(entry) { return entry.trim(); }), _.isEmpty);
         var range = this._timeline.getVisibleChartRange();
         this._filterInternal(range);
       },
