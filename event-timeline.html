@@ -87,7 +87,7 @@
       </iron-list>
     </div>
     <footer hidden$="[[loading]]">
-      Number of events: [[_rawEvents.length]]
+      Number of events: [[_eventSize]], currently shown: [[_rawEvents.length]]
     </footer>
 
   </template>
@@ -280,6 +280,7 @@
       _installListeners: function() {
         this._events.on("*", function(event, properties, senderId) {
           this.loading = true;
+          this._eventSize = this._events.length;
           this.debounce("update-events", function() {
             this._checkStartEnd();
             this._filter(null);
@@ -561,7 +562,7 @@
        * Callback invoked when over an event icon.
        */
       _mouseoverItemEventCallback: function(events) {
-        this._clickItemEventCallback(events);
+        // this._clickItemEventCallback(events);
       },
 
       /**
@@ -576,18 +577,40 @@
         }.bind(this));
       },
 
+      // /**
+      //  * Callback invoked when an event icon is clicked.
+      //  */
+      // _clickItemEventCallback: function(events) {
+      //   if (events.length > 0) {
+      //     var evts = this.getByIds(events, this._rawEvents);
+      //     var idx = _.findLastIndex(this._rawEvents, { event_id: evts[0].event_id });
+      //     this.$.eventsList.scrollToIndex(idx);
+      //     this._highlightItems(events);
+      //   }
+      // }
+      // 
+      
       /**
        * Callback invoked when an event icon is clicked.
        */
       _clickItemEventCallback: function(events) {
         if (events.length > 0) {
-          var evts = this.getByIds(events, this._rawEvents);
-          var idx = _.findLastIndex(this._rawEvents, { event_id: evts[0].event_id });
-          this.$.eventsList.scrollToIndex(idx);
-          this._highlightItems(events);
-        }
-      }
+          
+          var diff = _.difference(events, this._lastEvents);
 
+          if (diff.length === 0) {
+            // same symbol has been clicked again
+            this._resetRawEvents();
+          } else {
+            this._lastEvents = events;
+            this._rawEvents = this.getByIds(events, this.getAll());
+          }
+        }
+      },
+
+      _resetRawEvents: function() {
+        this._rawEvents = this.getAll();
+      }
 
     });
   })();
