@@ -561,6 +561,13 @@
        * Callback invoked when over an event icon.
        */
       _mouseoverItemEventCallback: function(events) {
+        this._clickItemEventCallback(events);
+      },
+
+      /**
+       * Hightlights the items defined in the array of event Ids.
+       */
+      _highlightItems: function(events) {
         _.each(this.getByIds(events, this._rawEvents), function(event) {
           var elem = this.$$('event-timeline-item[eventid="' + event.event_id + '"]');
           if (elem) {
@@ -577,7 +584,7 @@
           var evts = this.getByIds(events, this._rawEvents);
           var idx = _.findLastIndex(this._rawEvents, { event_id: evts[0].event_id });
           this.$.eventsList.scrollToIndex(idx);
-          this._mouseoverItemEventCallback(events);
+          this._highlightItems(events);
         }
       }
 
