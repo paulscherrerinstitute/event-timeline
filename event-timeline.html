@@ -48,6 +48,16 @@
         @apply(--layout-around-justified);
         margin-top: 10px;
       }
+      iron-list {
+        flex: 1;
+      }
+      .timelineEvents {
+        overflow: auto;
+        height: 50vh;
+      }
+      footer {
+        margin-top: 10px;
+      }
 
     </style>
     
@@ -66,15 +76,19 @@
       <paper-spinner active$="[[loading]]"></paper-spinner>
     </div>
 
-    <div class="timelineEvents" hidden$="[[loading]]">
+    <div id="timelineEvents" class="timelineEvents" hidden$="[[loading]]">
       <iron-list id="eventsList" class="eventsList"
         items="[[_rawEvents]]"
+        scroll-target="timelineEvents"
         hidden$="[[!_rawEvents.length]]" >
         <template>
           <event-timeline-item event="[[item]]" eventid$="[[item.event_id]]"></event-timeline-item>
         </template>
       </iron-list>
     </div>
+    <footer hidden$="[[loading]]">
+      Number of events: [[_rawEvents.length]]
+    </footer>
 
   </template>
 
