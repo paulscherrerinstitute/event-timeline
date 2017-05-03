@@ -3911,6 +3911,15 @@ links.Timeline.ItemBox.prototype.updateDOM = function () {
         links.Timeline.addEventListener(divDot, "click", function() {
           if(this.timelineRef.clickItemEventCallback !== undefined) {
             
+            // handling clicked events
+            var remove = this.dom.dot.classList.contains("clicked");
+            this.timelineRef.clusters.forEach(function(cluster) {
+                cluster.dom.dot.classList.remove("clicked");
+            }.bind(this));
+            if (!remove) {
+                this.dom.dot.classList.add("clicked");
+            }
+
             this.timelineRef.clickItemEventCallback(this._gatherEventIds(this.event_id, this.items));
 
           }

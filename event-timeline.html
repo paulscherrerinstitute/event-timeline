@@ -594,13 +594,13 @@
        * Callback invoked when an event icon is clicked.
        */
       _clickItemEventCallback: function(events) {
+
         if (events.length > 0) {
-          
           var diff = _.difference(events, this._lastEvents);
 
           if (diff.length === 0) {
             // same symbol has been clicked again
-            this._resetRawEvents();
+            this._resetForClick();
             this._lastEvents = [];
           } else {
             this._lastEvents = events;
@@ -609,9 +609,24 @@
         }
       },
 
-      _resetRawEvents: function() {
+      /**
+       * Resets the raw events as well as
+       */
+      _resetForClick: function() {
         this._rawEvents = this.getAll();
+      },
+
+      /**
+       * Removes the "clicked" class before.
+       */
+      _clearClickedClasses: function() {
+        var allTimelineEvents = this.querySelectorAll(".timeline-event-dot");
+        allTimelineEvents.forEach(function(domElem) {
+          domElem.classList.remove("clicked");
+        }.bind(this));
       }
+
+      
 
     });
   })();
