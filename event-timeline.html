@@ -573,8 +573,12 @@
        * Callback invoked when an event icon is clicked.
        */
       _clickItemEventCallback: function(events) {
-        // just invoke the mouse-over functionality
-        this._mouseoverItemEventCallback(events);
+        if (events.length > 0) {
+          var evts = this.getByIds(events, this._rawEvents);
+          var idx = _.findLastIndex(this._rawEvents, { event_id: evts[0].event_id });
+          this.$.eventsList.scrollToIndex(idx);
+          this._mouseoverItemEventCallback(events);
+        }
       }
 
 
