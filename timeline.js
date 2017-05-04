@@ -3916,9 +3916,8 @@ links.Timeline.ItemBox.prototype.updateDOM = function () {
             this.timelineRef.clusters.forEach(function(cluster) {
                 cluster.dom.dot.classList.remove("clicked");
             }.bind(this));
-            if (!remove) {
-                this.dom.dot.classList.add("clicked");
-            }
+            
+            remove ? this.dom.dot.classList.remove("clicked") : this.dom.dot.classList.add("clicked");
 
             this.timelineRef.clickItemEventCallback(this._gatherEventIds(this.event_id, this.items));
 
