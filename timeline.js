@@ -3911,11 +3911,20 @@ links.Timeline.ItemBox.prototype.updateDOM = function () {
         links.Timeline.addEventListener(divDot, "click", function() {
           if(this.timelineRef.clickItemEventCallback !== undefined) {
             
-            // handling clicked events
+            // deselection?
             var remove = this.dom.dot.classList.contains("clicked");
+
+
             this.timelineRef.clusters.forEach(function(cluster) {
                 cluster.dom.dot.classList.remove("clicked");
             }.bind(this));
+            
+            this.timelineRef.items.forEach(function(item) {
+                // handle non-clustered events
+                if (item.dom) {
+                    item.dom.dot.classList.remove("clicked");
+                }
+            });
             
             remove ? this.dom.dot.classList.remove("clicked") : this.dom.dot.classList.add("clicked");
 
