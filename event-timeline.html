@@ -9,10 +9,11 @@
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="../psi-external-deps/dependency-underscore.html">
+<link rel="import" href="../psi-external-deps/dependency-moment.html">
 <link rel="import" href="../psi-external-deps/dependency-vis.html">
 
-<!-- <script type="text/javascript" src="timeline.js"></script> -->
-<script type="text/javascript" src="timeline.min.js"></script>
+<script type="text/javascript" src="timeline.js"></script>
+<!-- <script type="text/javascript" src="timeline.min.js"></script> -->
 
 <link rel="import" href="event-timeline-styles.html">
 <link rel="import" href="event-types-styles.html">
@@ -296,8 +297,17 @@
       _checkStartEnd: function() {
         if (!_.isEmpty(this.start) && !_.isEmpty(this.end)) {
           this._timeline.firstDraw = false; // overwrites the logic when draw() is first invoked
-          this._timeline.setVisibleChartRange(new Date(this.start), new Date(this.end), true);
+          this._timeline.setVisibleChartRange(moment(this.start).toDate(), moment(this.end).toDate(), true);
         }
+      },
+
+      parseDate: function(date) {
+        const parsed = Date.parse(date);
+        if (!isNaN(parsed)) {
+          return parsed;
+        }
+
+        return Date.parse(date.replace(/-/g, '/').replace(/[a-z]+/gi, ' '));
       },
 
       /**
