@@ -190,6 +190,31 @@
 
         });
 
+        test('_filterInternal', function() {
+          var element = fixture('basic');
+          element.classMapping = {
+            type1: ["1"],
+            type2: ["2"],
+            type3: ["3"],
+            type4: ["4"]
+          };
+          // this will create the inverted mapping
+          element.addAll([
+            { event_id: 1, pulse_id: 1, type: 1, start: moment("2017-01-01") },
+            { event_id: 2, pulse_id: 2, type: 2, start: moment("2017-01-02") },
+            { event_id: 3, pulse_id: 3, type: 3, start: moment("2017-01-03") },
+            { event_id: 4, pulse_id: 4, type: 4, start: moment("2017-01-04") }
+          ]);
+
+          element._filterInternal( { start: moment("2017-01-01"), end: moment("2017-01-01") } );
+          assert.equal(1, element._rawEvents.length);
+          element._filterInternal( { start: moment("2017-01-01"), end: moment("2017-01-02") } );
+          assert.equal(2, element._rawEvents.length);
+          element._filterInternal( { start: moment("2017-01-01"), end: moment("2017-01-03") } );
+          assert.equal(3, element._rawEvents.length);
+
+        });
+
       });
     </script>
   </body>

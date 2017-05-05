@@ -88,7 +88,9 @@
       </iron-list>
     </div>
     <footer hidden$="[[loading]]">
-      loaded from backend: [[_eventSize]], currently shown: [[_rawEvents.length]]
+      <div>loaded from backend: [[_eventSize]], currently shown: [[_rawEvents.length]]</div>
+      <div hidden$="[[!loadedRange]]">loaded range: [[loadedRange.start]] to [[loadedRange.end]]</div>
+      
     </footer>
 
   </template>
@@ -108,6 +110,22 @@
         loading: {
           type: Boolean,
           value: false
+        },
+
+        /**
+         * Contains the range of the currently loaded event from the backend.
+         * Expected properties are `start` and `end`.
+         */
+        loadedRange: {
+          type: Object
+        },
+
+        /**
+         * Contains the range of the currently loaded event from the backend.
+         * Expected properties are `start` and `end`.
+         */
+        _zoomRange: {
+          type: Object
         },
 
         /**
@@ -315,7 +333,7 @@
         var splitValues = this.$.filterInput.value.split(",");
         this._filterList = _.reject(_.map(splitValues, function(entry) { return entry.trim(); }), _.isEmpty);
         var range = this._timeline.getVisibleChartRange();
-        this._filterInternal(range);
+        this._filterInternal(this._convertToMomentRange(range));
       },
 
       /**
@@ -323,8 +341,9 @@
        */
       _filterInternal: function(range) {
         
+        var momentRange = this._convertToMomentRange(range);
         var filterStartEnd = { filter: function (event) { 
-          return this._isInRange(range, event) && this._matchesStation(this._filterList, event);
+          return this._isInRange(momentRange, event) && this._matchesStation(this._filterList, event);
         }.bind(this) };
         
         this._rawEvents = this._events.get(filterStartEnd);
@@ -333,15 +352,26 @@
       },
 
       /**
+       * Converts the raw range (having Javascript Date objects) into momentjs range objects.
+       */
+      _convertToMomentRange: function(rawRange) {
+        return { start: moment(rawRange.start), end: moment(rawRange.end) };
+      },
+
+      /**
        * Sets the callback methods needed for hover/click events.
        */
       _installCallbacks: function() {
-        // adds the listener to the timeline instance
+        // adds the listener to the timeline instance, this is triggered whenever there is a zoom-in, zoom-out or move of the timeline
         links.events.addListener(this._timeline, "rangechanged", function(range) {
+          var momentRange = this._convertToMomentRange(range);
+          
           this.debounce("rangechanged-filter", function() { 
-            this._filterInternal(range);
+            this._zoomRange = momentRange;
+            this._filterInternal(momentRange);
             this.fire("timeline-move-zoom", range);
           }.bind(this), 500);
+
         }.bind(this));
 
         this._timeline.clickItemEventCallback = this._clickItemEventCallback.bind(this);
@@ -351,8 +381,9 @@
        * Takes in a start / end date and filters out the rest.
        * 
        */
-      localReload: function(momentStart, momentEnd) {
-        this._filterInternal({ start: momentStart.toDate(), end: momentEnd.toDate() });
+      localReload: function(start, end) {
+        var momentRange = this._convertToMomentRange({ start: start, end: end });
+        this._filterInternal(momentRange);
       },
 
       /**
@@ -385,19 +416,20 @@
        * 
        * @param  {Object}  event object containing `start`, or `start` and `end` properties (Date)
        */
-      _isInRange: function(range, event) {
+      _isInRange: function(momentRange, event) {
         if (event.end) {
           // Time range
-          if (range.start <= event.start && event.end <= range.end) {
+          if (momentRange.start.isSameOrBefore(event.start) && moment(event.end).isSameOrBefore(momentRange.end)) {
             return true;
           }
         } else {
           // Point object
-          if (range.start <= event.start && event.start <= range.end) {
+          if (momentRange.start.isSameOrBefore(event.start) && moment(event.start).isSameOrBefore(momentRange.end)) {
             return true;
           }
         }
         return false;
+
       },
 
       /**
@@ -600,7 +632,10 @@
        * Resets the raw events as well as
        */
       _resetForClick: function() {
-        this._rawEvents = this.getAll();
+        if (_.isEmpty(this._zoomRange)) {
+          this._zoomRange = this._convertToMomentRange(this.loadedRange);
+        }
+        this._filterInternal(this._zoomRange);
       }
 
     });
