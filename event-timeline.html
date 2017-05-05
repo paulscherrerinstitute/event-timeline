@@ -281,7 +281,9 @@
           width:           "100%",
           height:          "125px",
           cluster:         this.enableCluster,
-          clusterMaxItems: 1
+          clusterMaxItems: 1,
+          min: new Date(2000,0,0),
+          max: new Date(2100,0,0)
         };
         // Instantiate our timeline object.
         this._timeline = new links.Timeline(this.$.timeline, options);
