@@ -112,6 +112,11 @@
           value: false
         },
 
+        reloadTime: {
+          type: Number,
+          value: 500
+        },
+
         /**
          * Contains the range of the currently loaded event from the backend.
          * Expected properties are `start` and `end`.
@@ -303,7 +308,7 @@
           this.debounce("update-events", function() {
             this._checkStartEnd();
             this._filter(null);
-          }.bind(this), 500);
+          }.bind(this), this.reloadTime);
           
         }.bind(this));
       },
@@ -323,7 +328,7 @@
        * Invoked automatically when user types into the filter input. Delays execution 500ms.
        */
       _filterDelayed: function(e) {
-        this.debounce("filter-input", this._filter, 500);
+        this.debounce("filter-input", this._filter, this.reloadTime);
       },
 
       /**
@@ -370,7 +375,7 @@
             this._zoomRange = momentRange;
             this._filterInternal(momentRange);
             this.fire("timeline-move-zoom", range);
-          }.bind(this), 500);
+          }.bind(this), this.reloadTime);
 
         }.bind(this));
 
