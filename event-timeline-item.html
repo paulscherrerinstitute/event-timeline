@@ -1,11 +1,16 @@
 <link rel="import" href="../polymer/polymer.html">
 
-<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-collapse/iron-collapse.html">
+<link rel="import" href="../iron-icons/editor-icons.html">
 
 <link rel="import" href="../paper-material/paper-material.html">
 <link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-item/paper-icon-item.html">
 <link rel="import" href="../paper-item/paper-item-body.html">
+
 
 <!--
 `event-timeline`
@@ -28,17 +33,79 @@
       paper-material {
         border-bottom: 1px solid gray;
       }
+      iron-collapse {
+        --iron-collapse-transition-duration: 10ms;
+      }
+      .horiz {
+        @apply(--layout-horizontal);
+      }
+      .horiz .stretch {
+        @apply(--layout-flex);
+      }
+      #collapse {
+        @apply(--layout-center-justified);
+        color: #737373;
+      }
+      #collapse paper-item {
+        width: 40%;
+        border: 1px solid #cacaca;
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
+      .banner {
+        margin-top: 10px;
+        padding: 8px;
+        background-color: #d4e2ce;
+      }
+      paper-checkbox {
+        --paper-checkbox-checked-color: #69769e;
+        padding: 8px;
+      }
+      #collapse paper-button {
+        margin-bottom: 10px;
+      }
+
     </style>
     
-    <paper-material elevation="0">
+    <a id="downloadLink" target="_blank" style="display:none"></a>
+
+    <paper-material elevation="0" on-tap="_toggleCollapse">
+      
       <paper-item>
-        <paper-item-body two-line>
+        <paper-item-body>
           <div secondary>Pulse-ID: [[event.pulse_id]]</div>
           <div secondary>Date: [[event.start]]</div>
-          <div secondary>Station: [[event.station]]</div>
-          <div secondary>Error: [[event.error]] [Previous error: [[event.previous_error]]]</div>
+        </paper-item-body>
+        <paper-item-body>
+          <div class="horiz">
+            <div class="stretch">
+              <div secondary>Station: [[event.station]]</div>
+              <div secondary>Error: [[event.error]] [Previous error: [[event.previous_error]]]</div>
+            </div>
+            <div>
+            <div secondary>
+              <paper-icon-button id="expandMoreIcon" hidden$="[[_opened]]" icon="expand-more" class="flex"></paper-icon-button>
+              <paper-icon-button id="expandLessIcon" hidden$="[[!_opened]]" icon="expand-less" class="flex"></paper-icon-button>
+            </div>
+            </div>
+          </div>
         </paper-item-body>
       </paper-item>
+      
+      <div hidden$="[[!event.channels]]">
+        <iron-collapse id="collapse" class="horiz" opened="{{_opened}}">
+          <paper-item>
+            <paper-item-body >
+              <div class="banner" secondary>Selected channels to include in the data plot: </div>
+              <template is="dom-repeat" items="{{event.channels}}">
+                <paper-checkbox checked="{{item.checked}}" on-tap="_checkboxTap"><span secondary>{{item.name}}</span></paper-checkbox>
+              </template>
+              <paper-button id="plotBtn" raised class="flex" on-tap="_createLinkAndOpen">PLOT</paper-button>
+            </paper-item-body>
+          </paper-item>
+        </iron-collapse>
+      </div>
+
     </paper-material>
     
   </template>
@@ -52,6 +119,10 @@
 
       properties: {
         
+        /**
+         * Object with the following properties:
+         * 
+         */
         event: {
           type: Object,
           notify: true
@@ -73,10 +144,62 @@
         _highlightedAnimationTime: {
           type: Number,
           value: 500
-        }
+        },
+
+        dataUiUrl: {
+          type: String,
+          value: "https://ui-data-api.psi.ch/loadBreakdown"
+        },
 
       },
 
+      /**
+       * Invoked when use clicks on any checkbox.
+       */
+      _checkboxTap: function(e) {
+        this.$.plotBtn.disabled = !this._isPlotBtnEnabled();
+      },
+
+      /**
+       * Tests whether the plot button is to be enabled or disabled.
+       */
+      _isPlotBtnEnabled: function() {
+        if (this.event && this.event.channels) {
+          return _.any(_.pluck(this.event.channels, "checked"));
+        }
+        return false;
+      },
+
+      _createLinkAndOpen: function(e) {
+        
+        var channelNames = _.pluck(_.filter(this.event.channels, function(channel) { return channel.checked; }), "name");
+        var start = moment(this.event.start).subtract(5, 'seconds').format();
+        var end   = moment(this.event.start).add(5, 'seconds').format();
+        
+        var obj = {
+          channels  : channelNames,
+          startDate : start,
+          endDate   : end,
+          pulseId   : this.event.pulse_id
+        };
+
+        console.log(JSON.stringify(obj));
+        
+        var linkObj = encodeURIComponent(JSON.stringify(obj));
+        this.$.downloadLink.href = this.dataUiUrl + "&json=" + linkObj;
+        this.$.downloadLink.click();
+      },
+
+      /**
+       * Invoked when the user clicks on the plot-icon.
+       */
+      _toggleCollapse: function(e) {
+        this.$.collapse.toggle();
+      },
+
+      /**
+       * [setHighlighted description]
+       */
       setHighlighted: function() {
         if (!_.isEmpty(this.event)) {
           this.highlighted = true;
