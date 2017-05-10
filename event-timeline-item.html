@@ -146,6 +146,9 @@
           value: 500
         },
 
+        /**
+         * UI URL endpoint for sending channels to plot to.
+         */
         dataUiUrl: {
           type: String,
           value: "https://ui-data-api.psi.ch/loadBreakdown"
@@ -170,6 +173,9 @@
         return false;
       },
 
+      /**
+       * Creates the link and opens a hidden link.
+       */
       _createLinkAndOpen: function(e) {
         
         var channelNames = _.pluck(_.filter(this.event.channels, function(channel) { return channel.checked; }), "name");
@@ -183,10 +189,8 @@
           pulseId   : this.event.pulse_id
         };
 
-        console.log(JSON.stringify(obj));
-        
         var linkObj = encodeURIComponent(JSON.stringify(obj));
-        this.$.downloadLink.href = this.dataUiUrl + "&json=" + linkObj;
+        this.$.downloadLink.href = this.dataUiUrl + "?json=" + linkObj;
         this.$.downloadLink.click();
       },
 
@@ -198,7 +202,7 @@
       },
 
       /**
-       * [setHighlighted description]
+       * Highlights the current item.
        */
       setHighlighted: function() {
         if (!_.isEmpty(this.event)) {
