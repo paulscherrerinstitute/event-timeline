@@ -69,7 +69,7 @@
     
     <a id="downloadLink" target="_blank" style="display:none"></a>
 
-    <paper-material elevation="0" on-tap="_toggleCollapse">
+    <paper-material elevation="0">
       
       <paper-item>
         <paper-item-body>
@@ -84,8 +84,8 @@
             </div>
             <div>
             <div secondary>
-              <paper-icon-button id="expandMoreIcon" hidden$="[[_opened]]" icon="expand-more" class="flex"></paper-icon-button>
-              <paper-icon-button id="expandLessIcon" hidden$="[[!_opened]]" icon="expand-less" class="flex"></paper-icon-button>
+              <paper-icon-button id="expandMoreIcon" hidden$="[[_opened]]" icon="expand-more" class="flex" on-tap="_toggleCollapse"></paper-icon-button>
+              <paper-icon-button id="expandLessIcon" hidden$="[[!_opened]]" icon="expand-less" class="flex" on-tap="_toggleCollapse"></paper-icon-button>
             </div>
             </div>
           </div>
@@ -148,10 +148,10 @@
 
         /**
          * UI URL endpoint for sending channels to plot to.
+         * Will be set by event-timeline parent-component.
          */
         dataUiUrl: {
-          type: String,
-          value: "https://ui-data-api.psi.ch/loadBreakdown"
+          type: String
         },
 
       },
@@ -179,6 +179,7 @@
       _createLinkAndOpen: function(e) {
         
         var channelNames = _.pluck(_.filter(this.event.channels, function(channel) { return channel.checked; }), "name");
+        channelNames = _.map(channelNames, function(channel) { return this._getChannelObject(channel); }.bind(this));
         var start = moment(this.event.start).subtract(5, 'seconds').format();
         var end   = moment(this.event.start).add(5, 'seconds').format();
         
@@ -188,10 +189,31 @@
           endDate   : end,
           pulseId   : this.event.pulse_id
         };
-
+        console.log(JSON.stringify(obj));
         var linkObj = encodeURIComponent(JSON.stringify(obj));
         this.$.downloadLink.href = this.dataUiUrl + "?json=" + linkObj;
+
+        console.log(this.$.downloadLink.href);
+
         this.$.downloadLink.click();
+      },
+
+
+      /**
+       * Returns a channel object based on the trace-id in the form <backend>/<name>.
+       * 
+       * @param  {String} traceId trace-id in the form <backend>/<name>
+       * @return {Object}         channel object having a `backend` and a `name` property.
+       */
+      _getChannelObject: function(traceId) {
+        if (!_.isString(traceId)) {
+          throw new Error("Argument must be of type string");
+        }
+        var slashIndex = traceId.indexOf('/'),
+            backend = traceId.substring(0, slashIndex),
+            channelName = traceId.substring(slashIndex + 1);
+        
+        return { "backend": backend, "name": channelName };
       },
 
       /**
