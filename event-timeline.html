@@ -69,7 +69,7 @@
     <iron-a11y-keys target="[[fetchOnEnterInput]]" keys="enter" on-keys-pressed="_filter"></iron-a11y-keys>
 
     <paper-input id="filterInput" 
-      placeholder="Filter stations"
+      placeholder="Filter stations or errors"
       autofocus
       on-input="_filterDelayed">
         <paper-icon-button suffix icon="event-timeline-icons:search" on-tap="_filter"></paper-icon-button>
@@ -354,12 +354,62 @@
         
         var momentRange = this._convertToMomentRange(range);
         var filterStartEnd = { filter: function (event) { 
-          return this._isInRange(momentRange, event) && this._matchesStation(this._filterList, event);
+          return this._isInRange(momentRange, event) && 
+                 ( this._matches(this._filterList, "station", event) || 
+                   this._matches(this._filterList, "error", event) || 
+                   this._matches(this._filterList, "previous_error", event)
+                 );
         }.bind(this) };
         
         this._rawEvents = this._events.get(filterStartEnd);
         this._draw(); // make sure we update the elements from the timeline too
         this.loading = false;
+      },
+
+      /**
+       * Returns true if 1) no property has been specified or the regular expression of the 
+       * specified value behind the property matches the same-name property value in the `event` object.
+       * 
+       * @param  {String} propertyToMatch name of the property to be tested against
+       * @param  {Object} event   object as saved in the `_events` array
+       */
+      _matches: function(inputList, propertyToMatch, event) {
+        if (_.isEmpty(inputList)) {
+          return true;
+        } else {
+          // station is set
+          if (_.isEmpty(event[propertyToMatch])) {
+            return false;
+          }
+
+          var anyMatchList = _.map(inputList, function(input) {
+            var regex = new RegExp(input.toLowerCase());
+            return regex.test(event[propertyToMatch].toLowerCase());
+          });
+          // true if any of the matches is true
+          return _.some(anyMatchList);
+        }
+      },
+
+      /**
+       * Returns true if the event is inside
+       * 
+       * @param  {Object}  event object containing `start`, or `start` and `end` properties (Date)
+       */
+      _isInRange: function(momentRange, event) {
+        if (event.end) {
+          // Time range
+          if (momentRange.start.isSameOrBefore(event.start) && moment(event.end).isSameOrBefore(momentRange.end)) {
+            return true;
+          }
+        } else {
+          // Point object
+          if (momentRange.start.isSameOrBefore(event.start) && moment(event.start).isSameOrBefore(momentRange.end)) {
+            return true;
+          }
+        }
+        return false;
+
       },
 
       /**
@@ -395,52 +445,6 @@
       localReload: function(start, end) {
         var momentRange = this._convertToMomentRange({ start: start, end: end });
         this._filterInternal(momentRange);
-      },
-
-      /**
-       * Returns true if 1) no station has been specified or the regular expression of the 
-       * specified station matches the station value in the `event` object.
-       * 
-       * @param  {String} station name of the station to be tested against
-       * @param  {Object} event   object as saved in the `_events` array
-       */
-      _matchesStation: function(stationList, event) {
-        if (_.isEmpty(stationList)) {
-          return true;
-        } else {
-          // station is set
-          if (_.isEmpty(event.station)) {
-            return false;
-          }
-
-          var anyMatchList = _.map(stationList, function(station) {
-            var regex = new RegExp(station.toLowerCase());
-            return regex.test(event.station.toLowerCase());
-          });
-          // true if any of the matches is true
-          return _.some(anyMatchList);
-        }
-      },
-
-      /**
-       * Returns true if the event is inside
-       * 
-       * @param  {Object}  event object containing `start`, or `start` and `end` properties (Date)
-       */
-      _isInRange: function(momentRange, event) {
-        if (event.end) {
-          // Time range
-          if (momentRange.start.isSameOrBefore(event.start) && moment(event.end).isSameOrBefore(momentRange.end)) {
-            return true;
-          }
-        } else {
-          // Point object
-          if (momentRange.start.isSameOrBefore(event.start) && moment(event.start).isSameOrBefore(momentRange.end)) {
-            return true;
-          }
-        }
-        return false;
-
       },
 
       /**
