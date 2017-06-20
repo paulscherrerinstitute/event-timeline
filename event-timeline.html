@@ -380,16 +380,39 @@
         var filterStartEnd = { filter: function (event) { 
           var notFiltered = !_.contains(this.filterEvents, event.error);
           return this._isInRange(momentRange, event) && 
-                 notFiltered && 
-                 ( this._matches(this._filterList, "station", event) || 
-                   this._matches(this._filterList, "error", event) || 
-                   this._matches(this._filterList, "previous_error", event)
-                 );
+                 notFiltered &&
+                 this._substringMatch(this._filterList, event);
         }.bind(this) };
         
         this._rawEvents = this._events.get(filterStartEnd);
         this.draw(); // make sure we update the elements from the timeline too
         this.loading = false;
+      },
+
+
+      _concatenateSearchProperties: function(event) {
+        return ("station:" + event.station + " error:" + event.error + " previous:" + event.previous_error).toLowerCase();
+      },
+
+      /**
+       * Returns true if any part of the concatenated properties of the event object matches the user entered regex.
+       * 
+       * @param  {Array} inputList [description]
+       * @param  {Object} event    object as saved in the `_events` array
+       * @return {Boolean}         true if any part of the concatenated properties of the event object matches the user entered regex
+       */
+      _substringMatch: function(inputList, event) {
+        if (_.isEmpty(inputList)) {
+          return true;
+        } else {
+          var testString = this._concatenateSearchProperties(event);
+          var anyMatchList = _.map(inputList, function(input) {
+            var regex = new RegExp(input.toLowerCase());
+            return regex.test(testString.toLowerCase());
+          });
+          // true if any of the matches is true
+          return _.some(anyMatchList);
+        }
       },
 
       /**
@@ -411,6 +434,7 @@
           var anyMatchList = _.map(inputList, function(input) {
             var regex = new RegExp(input.toLowerCase());
             return regex.test(event[propertyToMatch].toLowerCase());
+            // return regex.test(testString.toLowerCase());
           });
           // true if any of the matches is true
           return _.some(anyMatchList);

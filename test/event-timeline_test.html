@@ -69,7 +69,7 @@
           assert.isTrue(event.length === 0);
         });
 
-        test("_matchesStation single", function() {
+        test("_matches stations single", function() {
           var element = fixture("basic");
           element.classMapping = {
             type1: ["1"],
@@ -78,24 +78,46 @@
             type4: ["4"]
           };
 
-          assert.isTrue(element._matchesStation(undefined, { }));
-          assert.isTrue(element._matchesStation([], { }));
-          assert.isTrue(element._matchesStation([], { station: ""}));
-          assert.isTrue(element._matchesStation([], { station: "test"}));
-          assert.isTrue(element._matchesStation(["test"], { station: "test"}));
-          assert.isTrue(element._matchesStation(["TEST"], { station: "test"}));
-          assert.isTrue(element._matchesStation(["Test"], { station: "test"}));
-          assert.isTrue(element._matchesStation(["TeST"], { station: "test"}));
+          assert.isTrue(element._matches(undefined, "station", { }));
+          assert.isTrue(element._matches([], "station", { }));
+          assert.isTrue(element._matches([], "station", { station: ""}));
+          assert.isTrue(element._matches([], "station", { station: "test"}));
+          assert.isTrue(element._matches(["test"], "station", { station: "test"}));
+          assert.isTrue(element._matches(["TEST"], "station", { station: "test"}));
+          assert.isTrue(element._matches(["Test"], "station", { station: "test"}));
+          assert.isTrue(element._matches(["TeST"], "station", { station: "test"}));
           
-          assert.isTrue(element._matchesStation(["t*"], { station: "test"}));
-          assert.isTrue(element._matchesStation(["t.*"], { station: "test"}));
-          assert.isTrue(element._matchesStation(["t.*t"], { station: "test"}));
-          assert.isTrue(element._matchesStation(["t*st"], { station: "test"}));
+          assert.isTrue(element._matches(["t*"],   "station", { station: "test"}));
+          assert.isTrue(element._matches(["t.*"],  "station", { station: "test"}));
+          assert.isTrue(element._matches(["t.*t"], "station", { station: "test"}));
+          assert.isTrue(element._matches(["t*st"], "station", { station: "test"}));
           
-          assert.isFalse(element._matchesStation(["test"], { station: "abc"}));
-          assert.isFalse(element._matchesStation(["t.t"], { station: "test"}));
+          assert.isFalse(element._matches(["test"], "station", { station: "abc"}));
+          assert.isFalse(element._matches(["t.*A"], "station", { station: "test"}));
 
         });
+
+        test("_concatenateSearchProperties", function() {
+          var element = fixture("basic");
+          assert.equal("station:test error:undefined previous error:undefined", element._concatenateSearchProperties({ station: "test" }));
+          assert.equal("station:test error:undefined previous error:undefined", element._concatenateSearchProperties({ station: "test", error: undefined, previous_error: undefined }));
+          assert.equal("station:test error:17 previous error:255", element._concatenateSearchProperties({ station: "test", error: 17, previous_error: 255 }));
+          assert.equal("station:test error:17 previous error:255", element._concatenateSearchProperties({ station: "tEsT", error: 17, previous_error: 255 }));
+        });
+
+        test("_matches doesn't match stations", function() {
+          var element = fixture("basic");
+          element.classMapping = {
+            type1: ["1"],
+            type2: ["2"],
+            type3: ["3"],
+            type4: ["4"]
+          };
+
+          assert.isFalse(element._matches(["test"], "station", { station: "abc"}));
+          assert.isFalse(element._matches(["t.*A"],  "station", { station: "test"}));
+        });
+
 
         test('_matchesStation multi', function() {
           var element = fixture('basic');
