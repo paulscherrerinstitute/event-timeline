@@ -6,6 +6,7 @@
 
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-spinner/paper-spinner.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="../psi-external-deps/dependency-underscore.html">
@@ -73,6 +74,7 @@
       autofocus
       on-input="_filterDelayed">
         <paper-icon-button suffix icon="event-timeline-icons:search" on-tap="_filter"></paper-icon-button>
+        <paper-icon-button suffix icon="event-timeline-icons:help-outline" on-tap="_openDetailModal"></paper-icon-button>
     </paper-input>
 
     <div id="timeline"></div>
@@ -91,11 +93,25 @@
         </template>
       </iron-list>
     </div>
+    
     <footer hidden$="[[loading]]">
       <div>loaded from backend: [[_eventSize]], currently shown: [[_rawEvents.length]]</div>
       <div hidden$="[[!loadedRange]]">loaded range: [[loadedRange.start]] to [[loadedRange.end]]</div>
-      
     </footer>
+
+    <paper-dialog id="searchExamplesDialog" modal on-iron-overlay-opened="patchOverlay">
+      <h2>Example queries:</h2>
+      <div>
+        SINEG.* error:17<br>
+        SINEG01 error:17 previous:0<br>
+        sineg.* previous:1[1-9] <br>
+        station:SINEG.* error:17<br>
+        station:SINEG.* error:17 previous:255<br>
+      </div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Close</paper-button>
+      </div>
+    </paper-dialog>
 
   </template>
 
@@ -701,6 +717,27 @@
           this._zoomRange = this._convertToMomentRange(this.loadedRange);
         }
         this._doFilter(this._zoomRange);
+      },
+
+      /**
+       * Function invoked when the detail dialog is clicked.
+       */
+      _openDetailModal: function(e) {
+        
+        this.$.searchExamplesDialog.noCancelOnEscKey = false;
+        this.$.searchExamplesDialog.noCancelOnOutsideClick = false;
+        this.$.searchExamplesDialog.open();
+      },
+
+      /**
+       * Makes sure the overlay is added on the right layer.
+       * 
+       * See https://github.com/PolymerElements/paper-dialog/issues/7
+       */
+      patchOverlay: function (e) {
+        if (e.target.withBackdrop) {
+          e.target.parentNode.insertBefore(e.target.backdropElement, e.target);
+        }
       }
 
     });
