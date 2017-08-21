@@ -155,6 +155,14 @@
           type: String
         },
 
+        /**
+         * 
+         */
+        timeAroundEvent: {
+          type: Number,
+          value: 5
+        },
+
       },
 
       /**
@@ -181,8 +189,8 @@
         
         var channelNames = _.pluck(_.filter(this.event.channels, function(channel) { return channel.checked; }), "name");
         channelNames = _.map(channelNames, function(channel) { return this._getChannelObject(channel); }.bind(this));
-        var start = moment(this.event.start).subtract(5, 'seconds').format();
-        var end   = moment(this.event.start).add(5, 'seconds').format();
+        var start    = moment(this.event.start).subtract(this.timeAroundEvent, 'seconds').format();
+        var end      = moment(this.event.start).add(this.timeAroundEvent, 'seconds').format();
         
         var obj = {
           channels  : channelNames,

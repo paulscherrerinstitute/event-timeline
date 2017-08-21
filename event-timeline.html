@@ -89,7 +89,12 @@
         scroll-target="timelineEvents"
         hidden$="[[!_rawEvents.length]]" >
         <template>
-          <event-timeline-item event="[[item]]" eventid$="[[item.event_id]]" data-ui-url="[[dataUiUrl]]"></event-timeline-item>
+          <event-timeline-item 
+            event="[[item]]"
+            eventid$="[[item.event_id]]"
+            data-ui-url="[[dataUiUrl]]"
+            time-around-event="[[timeAroundEvent]]">
+          </event-timeline-item>
         </template>
       </iron-list>
     </div>
