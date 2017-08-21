@@ -196,13 +196,12 @@
           channels  : channelNames,
           startDate : start,
           endDate   : end,
-          pulseId   : this.event.pulse_id
+          pulseId   : this.event.pulse_id,
+          rawData   : true; // requesting the data be drawn in it's raw form (data-ui)
         };
-        console.log(JSON.stringify(obj));
+        
         var linkObj = encodeURIComponent(JSON.stringify(obj));
         this.$.downloadLink.href = this.dataUiUrl + "?json=" + linkObj;
-
-        console.log(this.$.downloadLink.href);
 
         this.$.downloadLink.click();
       },
